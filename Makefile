@@ -2,9 +2,11 @@ CWD = $(shell pwd -P)
 ROOT = $(realpath $(CWD)/../..)
 PROJECT = teletype
 
+COMPILE_MOAR = src/teletype_default_modules.hrl
+
 all: compile
 
-compile: default_modules
+compile:
 
 default_modules: src/teletype_default_modules.hrl
 
