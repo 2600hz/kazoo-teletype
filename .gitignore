@@ -46,3 +46,4 @@ erlang.mk
 ## app specific gitignore
 
 /src/teletype_default_modules.hrl
+.apps.mk.*

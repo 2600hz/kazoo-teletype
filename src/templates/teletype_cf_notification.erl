@@ -57,7 +57,7 @@ handle_req(JObj, 'true') ->
             teletype_util:notification_failed(<<"cf_notification">>, <<"validation_failed">>)
     end.
 
--spec process_req(kz_json:object(), kz_json:ne_api_binary()) -> template_response().
+-spec process_req(kz_json:object(), kz_json:api_ne_binary()) -> template_response().
 process_req(DataJObj, TemplateId) ->
     Macros = [{<<"system">>, teletype_util:system_params()}
              ,{<<"account">>, teletype_util:account_params(DataJObj)}
