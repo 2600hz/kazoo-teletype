@@ -5,7 +5,7 @@
                              kazoo_modb,kazoo_numbers,kazoo_services,
                              kazoo_stdlib,kazoo_templates,kazoo_voicemail,
                              kazoo_web,kernel,lager,poolboy,stdlib]},
-              {description,"Teletype - Receive events and send them to interested parties"},
+              {description,"Teletype: Receive events and send them to interested parties"},
               {env,[{is_kazoo_app,true}]},
               {mod,{teletype_app,[]}},
               {modules,[]},
