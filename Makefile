@@ -1,5 +1,5 @@
 CWD = $(shell pwd -P)
-ROOT = $(realpath $(CWD)/../..)
+ROOT ?= $(realpath $(CWD)/../..)
 PROJECT = teletype
 
 COMPILE_MOAR = src/teletype_gen_email_template.erl src/teletype_default_modules.hrl
