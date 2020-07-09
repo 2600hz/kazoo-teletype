@@ -34,6 +34,13 @@
                      }
                     ]).
 
+-define(FEDERATE_BINDING(App)
+       ,case kapps_config:get_is_true(App, <<"use_federated_listener">>, 'false') of
+            'true' -> ['federate'];
+            _ -> []
+        end
+       ).
+
 -define(BINDINGS, [{'notifications', ?FEDERATE_BINDING(?NOTIFY_CONFIG_CAT)}
                   ,{'self', []}
                   ]).
