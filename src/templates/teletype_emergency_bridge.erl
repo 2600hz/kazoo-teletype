@@ -39,7 +39,7 @@
           ,?MACRO_VALUE(<<"call.user_email">>, <<"user_email">>, <<"User Email">>, <<"User Email">>)
           ,?MACRO_VALUE(<<"call.user_first_name">>, <<"user_first_name">>, <<"User First Name">>, <<"User First Name">>)
           ,?MACRO_VALUE(<<"call.user_last_name">>, <<"user_last_name">>, <<"User Last Name">>, <<"User Last Name">>)
-           | ?COMMON_TEMPLATE_MACROS
+          | ?COMMON_TEMPLATE_MACROS
           ]
          )
        ).

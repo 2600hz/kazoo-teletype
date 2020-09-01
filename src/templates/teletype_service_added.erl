@@ -66,7 +66,7 @@ macros() ->
       ,?MACRO_VALUE(<<"timestamp.local">>, <<"date_called_local">>, <<"Date (Local)">>, <<"When was the changed happened (Local time)">>)
       ,?MACRO_VALUE(<<"timestamp.timezone">>, <<"date_called_timezone">>, <<"Timestamp Timezone">>, <<"Timestamp Timezone">>)
       ,?MACRO_VALUE(<<"timestamp.timestamp">>, <<"date_called_timestamp">>, <<"Timestamp">>, <<"Timestamp">>)
-       | ?USER_MACROS
+      | ?USER_MACROS
        ++ ?SYSTEM_MACROS
       ]).
 
