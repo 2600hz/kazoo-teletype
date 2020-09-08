@@ -40,7 +40,7 @@ macros() ->
       ,?MACRO_VALUE(<<"details.http_headers">>, <<"details_http_headers">>, <<"Details HTTP headers">>, <<"Details HTTP headers">>)
       ,?MACRO_VALUE(<<"request.msg_id">>, <<"request_msg_id">>, <<"Request message ID">>, <<"Request message ID">>)
       ,?MACRO_VALUE(<<"request.node">>, <<"request_node">>, <<"Request node">>, <<"Request node">>)
-       | ?USER_MACROS
+      | ?USER_MACROS
        ++ ?COMMON_TEMPLATE_MACROS
       ]).
 
@@ -163,7 +163,7 @@ macros(DataJObj) ->
     ,{<<"user">>, admin_user_data(DataJObj)}
     ,{<<"request">>, request_macros(DataJObj)}
     ,{<<"message">>, kz_json:get_value(<<"message">>, DataJObj, <<>>)}
-     | details_macros(DataJObj)
+    | details_macros(DataJObj)
     ].
 
 -spec details_macros(kz_json:object()) -> kz_term:proplist().
