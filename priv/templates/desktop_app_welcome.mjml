@@ -1,0 +1,87 @@
+<mjml>
+  <mj-head>
+    <mj-title>Welcome to {{desktop.app_name}}</mj-title>
+    <mj-font href="https://fonts.googleapis.com/css?family=Open+Sans:100,400,700" />
+  </mj-head>
+  <mj-body background-color="#f3f3f5">
+    <mj-raw>
+      <div style="display:none;font-size:1px;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;mso-hide:all;font-family:sans-serif;">Starting with {{desktop.app_name}}</div>
+    </mj-raw>
+    <mj-section padding-bottom="0px" padding-top="0">
+      <mj-column>
+        <mj-spacer height="25px" />
+      </mj-column>
+    </mj-section>
+    <mj-section background-color="#5995f7" padding-bottom="0px" padding-top="0">
+      <mj-column>
+        <mj-text align="center" color="#555555" font-size="35px" font-weight="bold" font-family="Open Sans, Helvetica, Arial, sans-serif" padding="50px">Welcome aboard</mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-section background-color="#ffffff" padding-bottom="0px" padding-top="0" text-align="center">
+      <mj-column vertical-align="top" width="100%">
+        <mj-spacer height="25px" />
+      </mj-column>
+    </mj-section>
+    <mj-section background-color="#ffffff">
+      <mj-column vertical-align="middle" width="100%">
+        <mj-text align="left" color="#555555" font-weight="100" font-size="25px" font-family="Open Sans, Helvetica, Arial, sans-serif">Hello {{user.first_name}}<br/><br/></mj-text>
+        <mj-text align="left" color="#555555" font-size="15px" font-family="Open Sans, Helvetica, Arial, sans-serif">Welcome to <b>{{desktop.app_name}}</b>! First, lets get you started:</mj-text>
+        <mj-text align="left" color="#555555" font-size="15px" font-family="Open Sans, Helvetica, Arial, sans-serif" line-height="25px">
+          <ol>
+            <li>
+              <div>Download the app:</div>
+              <ul style="list-style-type: '- ';">
+                <li>Log in to {{branding.account.domain|default:"your portal"}}</li>
+                <li>Open User Portal</li>
+                <li>Navigate to <b>comm.io</b> tab</li>
+                <li>Download and install the app for your platform</li>
+              </ul>
+            </li>
+            <li>
+              <div>Sign in using your portal credentials</div>
+              <ul style="list-style-type: '- ';">
+                <li>The same credentials you used to log in to Monster UI in in step 1 above</li>
+              </ul>
+            </li>
+            <li>
+              <div>Control and manage your devices, calls, and faxes from your desktop!</div>
+              <ul style="list-style-type: '- ';">
+                <li>Listen to voicemails and manage your voicemail box</li>
+                <li>View your recent and missed calls</li>
+                <li>Toggle DND for your devices</li>
+                <li>View and send faxes from your desktop</li>
+              </ul>
+            </li>
+          </ol><br/>
+        </mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-raw>{% if desktop.webphone_enabled %}</mj-raw>
+    <mj-section background-color="#00AD55" background-color="#043768">
+      <mj-column vertical-align="middle" width="100%">
+        <mj-text align="left" color="#ffffff" font-size="15px" font-family="Open Sans, Helvetica, Arial, sans-serif" line-height="25px">Additionally, you have access to the built-in webphone! Simply click the phone icon in {{desktop.app_name}} to get started making calls directly from your desktop.</mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-raw>{% endif %}</mj-raw>
+    <mj-section background-color="#d5d5d5" padding="0px">
+      <mj-column vertical-align="middle" width="100%">
+        <mj-text align="left" color="#555555" font-size="12px" font-weight="100" font-family="Open Sans, Helvetica, Arial, sans-serif" padding="15px 25px 0px">Account Information</mj-text>
+        <mj-text align="left" color="#555555" font-size="10px" font-family="Open Sans, Helvetica, Arial, sans-serif" line-height="20px">
+          <b>-&nbsp;&nbsp;&nbsp;Account ID:</b>&nbsp;&nbsp;<span style="font-family:monospace;">{{account.id}}</span><br/>
+          <b>-&nbsp;&nbsp;&nbsp;Account Name:</b>&nbsp;&nbsp;<span style="font-family:monospace;">{{account.name}}</span><br/>
+          <b>-&nbsp;&nbsp;&nbsp;Account Realm:</b>&nbsp;&nbsp;<span style="font-family:monospace;">{{account.realm}}</span>
+        </mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-section background-color="#202029" padding-bottom="0px" padding-top="0">
+      <mj-column>
+        <mj-spacer height="50px" />
+      </mj-column>
+    </mj-section>
+    <mj-section padding-bottom="5px" padding-top="5px">
+      <mj-column vertical-align="middle" width="100%">
+        <mj-text align="left" color="#555555" font-size="10px" font-family="Open Sans, Helvetica, Arial, sans-serif" padding="0px">Sent from {{system.encoded_node}}</mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

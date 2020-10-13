@@ -1,0 +1,38 @@
+                Welcome aboard
+
+
+Hello {{user.first_name}}
+
+
+Welcome to {{desktop.app_name}}! First, lets get you started:
+
+ 1) Download the app:
+      - Log in to {{branding.account.domain|default:"your portal"}}
+      - Open User Portal
+      - Navigate to comm.io tab
+      - Download and install the app for your platform
+ 2) Sign in using your portal credentials
+      - The same credentials you used to log in to Monster UI in in step 1 above
+ 3) Control and manage your devices, calls, and faxes from your desktop!
+      - Listen to voicemails and manage your voicemail box
+      - View your recent and missed calls
+      - Toggle DND for your devices
+      - View and send faxes from your desktop
+
+
+{% if desktop.webphone_enabled %}
+    Additionally, you have access to the built-in webphone! Simply click the phone icon
+    in {{desktop.app_name}} to get started making calls directly from your desktop.
+{% endif %}
+
+
+
+Account Information
+
+    Account ID: {{account.id}}
+    Account Name: {{account.name}}
+    Account Realm: {{account.realm}}
+
+
+
+Sent from {{system.encoded_node}}

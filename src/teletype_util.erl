@@ -27,6 +27,9 @@
         ,is_notice_enabled/3, is_notice_enabled_default/1
         ,should_handle_notification/1
 
+        ,branding_params/1
+        ,find_branding_params/1
+
         ,default_from_address/0
         ,default_reply_to/0
 
@@ -77,7 +80,7 @@ send_email(Emails0, Subject, RenderedTemplates, Attachments) ->
             ,email_parameters([{<<"To">>, To}
                               ,{<<"Cc">>, props:get_value(<<"cc">>, Emails)}
                               ,{<<"Bcc">>, props:get_value(<<"bcc">>, Emails)}
-                              ,{<<"X-Teletype-Log-ID">>, kz_log:get_callid()}
+                              ,{<<"X-Teletype-Log-ID">>, get_call_id()}
                               ]
                              ,[{<<"From">>, From}
                               ,{<<"Reply-To">>, props:get_value(<<"reply_to">>, Emails)}
@@ -98,6 +101,15 @@ send_email(Emails0, Subject, RenderedTemplates, Attachments) ->
         {'error', Reason} = E ->
             maybe_log_smtp(Emails, Subject, RenderedTemplates, 'undefined', send_error_reason(Reason)),
             E
+    end.
+
+-spec get_call_id() -> binary().
+get_call_id() ->
+    case kz_log:get_callid() of
+        'undefined' ->
+            kz_log:find_callid([]);
+        CallId ->
+            kz_term:to_binary(CallId)
     end.
 
 -spec send_error_reason(any()) -> kz_term:ne_binary().
@@ -462,6 +474,32 @@ maybe_add_parent_params(AccountId, AccountJObj) ->
             ,{<<"parent_realm">>, kzd_accounts:realm(ParentAccountJObj)}
             ,{<<"parent_id">>, kz_doc:id(ParentAccountJObj)}
             ]
+    end.
+
+-spec branding_params(kz_json:object()) -> kz_term:proplist().
+branding_params(DataJObj) ->
+    case kapi_notifications:account_id(DataJObj) of
+        'undefined' ->
+            [{<<"account">>, []}
+            ,{<<"reseller">>, []}
+            ];
+        AccountId ->
+            [{<<"account">>, find_branding_params(AccountId)}
+            ,{<<"reseller">>, find_branding_params(kz_services_reseller:get_id(AccountId))}
+            ]
+    end.
+
+-spec find_branding_params(kz_term:api_binary()) -> kz_term:proplist().
+find_branding_params('undefined') -> [];
+find_branding_params(AccountId) ->
+    case kzd_whitelabel:fetch(AccountId) of
+        {'ok', WhiteLabelJObj} ->
+            kz_json:recursive_to_proplist(
+              kz_doc:public_fields(WhiteLabelJObj)
+             );
+        {'error', _E} ->
+            ?LOG_DEBUG("failed to fetch whitelabel doc for ~s: ~p", [AccountId, _E]),
+            []
     end.
 
 -spec default_from_address() -> kz_term:ne_binary().
