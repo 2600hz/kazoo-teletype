@@ -82,7 +82,7 @@ process_req(DataJObj, AccountId) ->
     VMBox = get_vm_box(AccountId, DataJObj),
     User = get_vm_box_owner(VMBox, DataJObj),
 
-    BoxEmails = kzd_voicemail_box:notification_emails(VMBox),
+    BoxEmails = kzd_vmboxes:notify_email_addresses(VMBox),
     Emails = maybe_add_user_email(BoxEmails, kzd_users:email(User)),
 
     ReqData =
