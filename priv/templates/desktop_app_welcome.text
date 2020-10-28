@@ -12,7 +12,7 @@ Welcome to {{desktop.app_name}}! First, lets get you started:
       - Navigate to comm.io tab
       - Download and install the app for your platform
  2) Sign in using your portal credentials
-      - The same credentials you used to log in to Monster UI in in step 1 above
+      - Use the same credentials you used to log in to Monster UI in in step 1 above
  3) Control and manage your devices, calls, and faxes from your desktop!
       - Listen to voicemails and manage your voicemail box
       - View your recent and missed calls
@@ -24,6 +24,9 @@ Welcome to {{desktop.app_name}}! First, lets get you started:
     Additionally, you have access to the built-in webphone! Simply click the phone icon
     in {{desktop.app_name}} to get started making calls directly from your desktop.
 {% endif %}
+
+
+If you have any suggestions on how we can improve, let us know at feedback@2600hz.com.
 
 
 
