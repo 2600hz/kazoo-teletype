@@ -27,6 +27,7 @@ cover/
 .project
 .settings
 .idea/
+**/.vscode/
 
 sup.bash
 

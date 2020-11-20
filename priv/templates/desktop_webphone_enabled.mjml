@@ -1,0 +1,61 @@
+<mjml>
+  <mj-head>
+    <mj-title>You're webphone is now enabled</mj-title>
+    <mj-font href="https://fonts.googleapis.com/css?family=Open+Sans:100,400,700" />
+  </mj-head>
+  <mj-body background-color="#f3f3f5">
+    <mj-raw>
+      <div style="display:none;font-size:1px;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;mso-hide:all;font-family:sans-serif;">You're webphone is now enabled</div>
+    </mj-raw>
+    <mj-section padding-bottom="0px" padding-top="0">
+      <mj-column>
+        <mj-spacer height="25px" />
+      </mj-column>
+    </mj-section>
+    <mj-section background-color="#5995f7" padding-bottom="0px" padding-top="0">
+      <mj-column>
+        <mj-text align="center" color="#555555" font-size="35px" font-weight="bold" font-family="Open Sans, Helvetica, Arial, sans-serif" padding="50px">Webphone is enabled</mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-section background-color="#ffffff" padding-bottom="0px" padding-top="0" text-align="center">
+      <mj-column vertical-align="top" width="100%">
+        <mj-spacer height="25px" />
+      </mj-column>
+    </mj-section>
+    <mj-section background-color="#ffffff">
+      <mj-column vertical-align="middle" width="100%">
+        <mj-text align="left" color="#555555" font-weight="100" font-size="20px" font-family="Open Sans, Helvetica, Arial, sans-serif">Hello {{user.first_name}}<br /><br /></mj-text>
+        <mj-text align="left" color="#555555" font-size="15px" font-family="Open Sans, Helvetica, Arial, sans-serif" line-height="20px">You now have access to the webphone. Once you have installed <b>{{desktop.app_name}}</b> you'll see the webphone
+          presented in the Toolbar. Simply, click on that to start using the webphone to make your first outbound call directly from your desktop.</mj-text>
+        <mj-text align="left" color="#555555" font-size="15px" font-family="Open Sans, Helvetica, Arial, sans-serif" line-height="20px">Additionally, the webphone can be accessed from the tray icon and also by using these shortkeys:</mj-text>
+        <mj-text align="left" color="#555555" font-size="15px" font-family="Open Sans, Helvetica, Arial, sans-serif" line-height="20px">
+          <ul>
+            <li>MacOS: <code>shift + cmd + p</code></li>
+            <li>Windows: <code>shift + ctrl + p</code></li>
+          </ul>
+        </mj-text>
+        <mj-text align="left" color="#555555" font-size="15px" font-family="Open Sans, Helvetica, Arial, sans-serif" line-height="20px">If you have any suggestions on how we can improve, let us know at <a href="mailto:feedback@2600hz.com">feedback@2600hz.com</a>.<br /></mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-section background-color="#d5d5d5" padding="0px">
+      <mj-column vertical-align="middle" width="100%">
+        <mj-text align="left" color="#555555" font-size="12px" font-weight="100" font-family="Open Sans, Helvetica, Arial, sans-serif" padding="15px 25px 0px">Account Information</mj-text>
+        <mj-text align="left" color="#555555" font-size="10px" font-family="Open Sans, Helvetica, Arial, sans-serif" line-height="20px">
+          <b>-&nbsp;&nbsp;&nbsp;Account ID:</b>&nbsp;&nbsp;<span style="font-family:monospace;">{{account.id}}</span><br />
+          <b>-&nbsp;&nbsp;&nbsp;Account Name:</b>&nbsp;&nbsp;<span style="font-family:monospace;">{{account.name}}</span><br />
+          <b>-&nbsp;&nbsp;&nbsp;Account Realm:</b>&nbsp;&nbsp;<span style="font-family:monospace;">{{account.realm}}</span>
+        </mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-section background-color="#202029" padding-bottom="0px" padding-top="0">
+      <mj-column>
+        <mj-spacer height="50px" />
+      </mj-column>
+    </mj-section>
+    <mj-section padding-bottom="5px" padding-top="5px">
+      <mj-column vertical-align="middle" width="100%">
+        <mj-text align="left" color="#555555" font-size="10px" font-family="Open Sans, Helvetica, Arial, sans-serif" padding="0px">Sent from {{system.encoded_node}}</mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

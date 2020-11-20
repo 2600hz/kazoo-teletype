@@ -71,6 +71,17 @@
                            ])
         }).
 
+-define(BRANDING_MACROS
+       ,[?MACRO_VALUE(<<"branding.account.brandColor">>, <<"branding_account_brandColor">>, <<"Account Brand Color">>, <<"Account Brand Color">>)
+        ,?MACRO_VALUE(<<"branding.account.companyName">>, <<"branding_account_companyName">>, <<"Account Company Name">>, <<"Account Company Name">>)
+        ,?MACRO_VALUE(<<"branding.account.company_name">>, <<"branding_account_company_name">>, <<"Account Company Name">>, <<"Account Company Name">>)
+        ,?MACRO_VALUE(<<"branding.account.domain">>, <<"branding_account_domain">>, <<"Account Domain">>, <<"Account Domain">>)
+        ,?MACRO_VALUE(<<"branding.reseller.brandColor">>, <<"branding_reseller_brandColor">>, <<"Reseller Brand Color">>, <<"Reseller Brand Color">>)
+        ,?MACRO_VALUE(<<"branding.reseller.companyName">>, <<"branding_reseller_companyName">>, <<"Reseller Company Name">>, <<"Reseller Company Name">>)
+        ,?MACRO_VALUE(<<"branding.reseller.company_name">>, <<"branding_reseller_company_name">>, <<"Reseller Company Name">>, <<"Reseller Company Name">>)
+        ,?MACRO_VALUE(<<"branding.reseller.domain">>, <<"branding_account_domain">>, <<"Reseller Domain">>, <<"Reseller Domain">>)
+        ]).
+
 -define(CALLER_ID_MACROS
        ,[?MACRO_VALUE(<<"caller_id.number">>, <<"caller_id_number">>, <<"Caller ID Number">>, <<"Number of the caller">>)
         ,?MACRO_VALUE(<<"caller_id.name">>, <<"caller_id_name">>, <<"Caller ID Name">>, <<"Name of the caller">>)

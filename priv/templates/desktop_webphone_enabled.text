@@ -1,0 +1,29 @@
+            Webphone is enabled
+
+
+Hello {{user.first_name}}
+
+
+You now have access to the webphone. Once you have installed {{desktop.app_name}} you'll
+see the webphone presented in the Toolbar. Simply, click on that to start using the webphone
+to make your first outbound call directly from your desktop.
+
+Additionally, the webphone can be accessed from the tray icon and also by using these shortkeys:
+
+ *) MacOS: shift + cmd + p
+ *) Windows: shift + ctrl + p
+
+
+If you have any suggestions on how we can improve, let us know at feedback@2600hz.com.
+
+
+
+Account Information
+
+    Account ID: {{account.id}}
+    Account Name: {{account.name}}
+    Account Realm: {{account.realm}}
+
+
+
+Sent from {{system.encoded_node}}
