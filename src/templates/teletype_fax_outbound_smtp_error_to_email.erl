@@ -34,6 +34,7 @@
           ,?MACRO_VALUE(<<"faxbox.id">>, <<"faxbox_id">>, <<"FaxBox ID">>, <<"FaxBox ID">>)
           ,?MACRO_VALUE(<<"faxbox.name">>, <<"faxbox_name">>, <<"FaxBox Name">>, <<"FaxBox Name">>)
           ]
+          ++ ?FAX_OUTBOUND_MACROS
           ++ ?USER_MACROS
           ++ ?COMMON_TEMPLATE_MACROS
          )
@@ -134,6 +135,7 @@ get_fax_data(DataJObj) ->
     [Error | _]=Errors = kz_json:get_list_value(<<"errors">>, DataJObj),
     props:filter_empty(
       [{<<"from">>, kz_json:get_ne_binary_value(<<"fax_from_email">>, DataJObj)}
+      ,{<<"subject">>, kz_json:get_value(<<"subject">>, DataJObj)}
       ,{<<"number">>, kz_json:get_ne_binary_value(<<"number">>, DataJObj)}
       ,{<<"original_number">>, kz_json:get_ne_binary_value(<<"original_number">>, DataJObj)}
       ,{<<"to">>, kz_json:get_ne_binary_value(<<"fax_to_email">>, DataJObj)}
