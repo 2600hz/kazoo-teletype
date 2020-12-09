@@ -252,7 +252,7 @@ maybe_add_module_to_autoload(Module) when is_binary(Module) ->
     case lists:member(Module, Autoload) of
         'true' -> 'ok';
         'false' ->
-            {'ok', _} = kapps_config:set_default(?NOTIFY_CONFIG_CAT
+            {'ok', _} = kapps_config:set_default(?CONFIG_CAT
                                                 ,?AUTOLOAD_MODULES_KEY
                                                 ,lists:usort([Module | Autoload])
                                                 ),
@@ -267,7 +267,7 @@ maybe_remove_module_from_autoload(Module) when is_binary(Module) ->
     case lists:member(Module, Autoload) of
         'false' -> 'ok';
         'true' ->
-            {'ok', _} = kapps_config:set_default(?NOTIFY_CONFIG_CAT
+            {'ok', _} = kapps_config:set_default(?CONFIG_CAT
                                                 ,?AUTOLOAD_MODULES_KEY
                                                 ,lists:delete(Module, Autoload)
                                                 ),

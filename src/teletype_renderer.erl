@@ -108,7 +108,7 @@ next_backoff(BackoffMs) ->
 
 -spec backoff_fudge() -> pos_integer().
 backoff_fudge() ->
-    FudgeMs = kapps_config:get_integer(?NOTIFY_CONFIG_CAT, <<"backoff_fudge_ms">>, 5 * ?MILLISECONDS_IN_SECOND),
+    FudgeMs = kapps_config:get_integer(?CONFIG_CAT, <<"backoff_fudge_ms">>, 5 * ?MILLISECONDS_IN_SECOND),
     rand:uniform(FudgeMs).
 
 -spec init(list()) -> {'ok', atom()}.
