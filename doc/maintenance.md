@@ -1,4 +1,3 @@
-
 # Overview
 
 Most operators will be interested in whether emails are sending or not.
@@ -71,3 +70,14 @@ sup teletype_maintenance force_system_default {ACCOUNT_ID}
 ```shell
 sup teletype_maintenance force_system_default {ACCOUNT_ID} {TEMPLATE_NAME}
 ```
+
+## Configuring Basic SMTP Client
+
+For sending email templates you need to have a SMTP server. Use this these settings to configure the Kazoo how to connect to SMTP server:
+
+* `configure_smtp_relay`: URL/IP of SMTP server, default `localhost`
+* `configure_smtp_port`: SMTP server port to connect, default `25`
+* `configure_smtp_auth`: Is authentication is required by server. Possible values: `always`, `if_available`, `never`. Default `never`.
+* `configure_smtp_username`: User name to authenticate with SMTP server
+* `configure_smtp_password`: Password to authenticate with SMTP server
+* `reload_smtp_configs`: Flush/reload all settings in `smtp_client`
