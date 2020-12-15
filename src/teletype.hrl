@@ -12,7 +12,7 @@
 
 -define(PVT_TYPE, kz_notification:pvt_type()).
 
--define(NOTIFY_CONFIG_CAT, <<"notify">>).
+-define(CONFIG_CAT, <<"teletype">>).
 
 -define(CACHE_NAME, 'teletype_cache').
 
@@ -251,7 +251,7 @@
 
 -define(AUTOLOAD_MODULES_KEY, <<"autoload_modules">>).
 -define(AUTOLOAD_MODULES
-       ,kapps_config:get(?NOTIFY_CONFIG_CAT, ?AUTOLOAD_MODULES_KEY, ?DEFAULT_MODULES)
+       ,kapps_config:get(?CONFIG_CAT, ?AUTOLOAD_MODULES_KEY, ?DEFAULT_MODULES)
        ).
 
 -define(TELETYPE_HRL, 'true').

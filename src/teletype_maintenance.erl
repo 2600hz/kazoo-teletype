@@ -25,9 +25,71 @@
         ]).
 -export([register_views/0]).
 
+-export([reload_smtp_configs/0]).
+-export([configure_smtp_relay/1
+        ,configure_smtp_username/1
+        ,configure_smtp_password/1
+        ,configure_smtp_auth/1
+        ,configure_smtp_port/1
+        ]).
+
+-define(SMTP_CLIENT_DOC, <<"smtp_client">>).
+
 -include("teletype.hrl").
 
 -define(RECEIPT_FORMAT, " ~4.s | ~45.s | ~-45.s | ~-30.s | ~-30.s | ~-20.s~n").
+
+%%------------------------------------------------------------------------------
+%% @doc
+%% @end
+%%------------------------------------------------------------------------------
+-spec reload_smtp_configs() -> 'ok'.
+reload_smtp_configs() ->
+    kapps_config:flush(<<"smtp_client">>).
+
+%%------------------------------------------------------------------------------
+%% @doc Configures the Relay key of the SMTP_Client System Config document.
+%% @end
+%%------------------------------------------------------------------------------
+-spec configure_smtp_relay(kz_term:ne_binary()) -> 'ok'.
+configure_smtp_relay(Value) ->
+    _ = kapps_config:set_string(?SMTP_CLIENT_DOC, <<"relay">>, Value),
+    'ok'.
+%%------------------------------------------------------------------------------
+%% @doc Configures the username key of the SMTP_Client System Config document.
+%% @end
+%%------------------------------------------------------------------------------
+-spec configure_smtp_username(kz_term:ne_binary()) -> 'ok'.
+configure_smtp_username(Value) ->
+    _ = kapps_config:set_string(?SMTP_CLIENT_DOC, <<"username">>, Value),
+    'ok'.
+
+%%------------------------------------------------------------------------------
+%% @doc Configures the password key of the SMTP_Client System Config document.
+%% @end
+%%------------------------------------------------------------------------------
+-spec configure_smtp_password(kz_term:ne_binary()) -> 'ok'.
+configure_smtp_password(Value) ->
+    _ = kapps_config:set_string(?SMTP_CLIENT_DOC, <<"password">>, Value),
+    'ok'.
+
+%%------------------------------------------------------------------------------
+%% @doc Configures the username key of the SMTP_Client System Config document.
+%% @end
+%%------------------------------------------------------------------------------
+-spec configure_smtp_auth(kz_term:ne_binary()) -> 'ok'.
+configure_smtp_auth(Value) ->
+    _ = kapps_config:set_string(?SMTP_CLIENT_DOC, <<"auth">>, Value),
+    'ok'.
+
+%%------------------------------------------------------------------------------
+%% @doc Configures the port key of the SMTP_Client System Config document.
+%% @end
+%%------------------------------------------------------------------------------
+-spec configure_smtp_port(kz_term:ne_binary()) -> 'ok'.
+configure_smtp_port(Value) ->
+    _ = kapps_config:set_integer(?SMTP_CLIENT_DOC, <<"port">>, Value),
+    'ok'.
 
 -spec receipts() -> 'ok'.
 receipts() ->
@@ -252,7 +314,7 @@ maybe_add_module_to_autoload(Module) when is_binary(Module) ->
     case lists:member(Module, Autoload) of
         'true' -> 'ok';
         'false' ->
-            {'ok', _} = kapps_config:set_default(?NOTIFY_CONFIG_CAT
+            {'ok', _} = kapps_config:set_default(?CONFIG_CAT
                                                 ,?AUTOLOAD_MODULES_KEY
                                                 ,lists:usort([Module | Autoload])
                                                 ),
@@ -267,7 +329,7 @@ maybe_remove_module_from_autoload(Module) when is_binary(Module) ->
     case lists:member(Module, Autoload) of
         'false' -> 'ok';
         'true' ->
-            {'ok', _} = kapps_config:set_default(?NOTIFY_CONFIG_CAT
+            {'ok', _} = kapps_config:set_default(?CONFIG_CAT
                                                 ,?AUTOLOAD_MODULES_KEY
                                                 ,lists:delete(Module, Autoload)
                                                 ),

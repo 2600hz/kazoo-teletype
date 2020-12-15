@@ -25,7 +25,6 @@
         ,find_account_db/2
         ,find_account_params/1
         ,is_notice_enabled/3, is_notice_enabled_default/1
-        ,should_handle_notification/1
 
         ,branding_params/1
         ,find_branding_params/1
@@ -366,7 +365,7 @@ add_rendered_templates_to_email(RenderedTemplates) ->
 add_rendered_templates_to_email([], Acc) -> Acc;
 add_rendered_templates_to_email([{ContentType, Content}|Rs], Acc) ->
     [Type, SubType] = binary:split(ContentType, <<"/">>),
-    CTEncoding = kapps_config:get_ne_binary(?NOTIFY_CONFIG_CAT
+    CTEncoding = kapps_config:get_ne_binary(?CONFIG_CAT
                                            ,[<<"mime-encoding">>
                                             ,ContentType
                                             ,<<"content_transfer_encoding">>
@@ -666,27 +665,6 @@ filter_for_admins(Users) ->
         Doc <- [kz_json:get_value(<<"doc">>, User)],
         kzd_users:is_account_admin(Doc)
     ].
-
--spec should_handle_notification(kz_json:object()) -> boolean().
-should_handle_notification(JObj) ->
-    DataJObj = kz_json:normalize(JObj),
-    should_handle_notification(DataJObj, is_preview(JObj)).
-
--spec should_handle_notification(kz_json:object(), boolean()) -> boolean().
-should_handle_notification(_JObj, 'true') ->
-    lager:debug("notification is a preview, handling"),
-    'true';
-
-should_handle_notification(JObj, 'false') ->
-    Account = kapi_notifications:account_id(JObj),
-
-    Config = kzd_accounts:get_inherited_value(Account
-                                             ,fun kzd_accounts:notification_preference/1
-                                             ,kapps_config:get_ne_binary(?NOTIFY_CONFIG_CAT, <<"notification_app">>, ?APP_NAME)
-                                             ),
-
-    lager:debug("notification configuration is: ~p", [Config]),
-    Config =:= ?APP_NAME.
 
 -spec is_notice_enabled(kz_term:api_binary(), kz_json:object(), kz_term:ne_binary()) -> boolean().
 is_notice_enabled('undefined', _ApiJObj, TemplateKey) ->
