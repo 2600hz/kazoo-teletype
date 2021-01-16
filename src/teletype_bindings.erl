@@ -1,5 +1,5 @@
 %%%-----------------------------------------------------------------------------
-%%% @copyright (C) 2010-2020, 2600Hz
+%%% @copyright (C) 2010-2021, 2600Hz
 %%% @doc
 %%% This Source Code Form is subject to the terms of the Mozilla Public
 %%% License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -63,9 +63,19 @@ notification(JObj) ->
             lager:debug("~s", [FailureMsg]),
             teletype_util:send_update(JObj, <<"failed">>, FailureMsg);
         BindingResult ->
-            {_, Map} = lists:foldl(fun check_result/2, {RoutingKey, maps:new()}, BindingResult),
+            {_, Map} = handle_notification_results(BindingResult, {RoutingKey, maps:new()}),
             maybe_send_update(JObj, RoutingKey, Map)
     end.
+
+-spec handle_notification_results(template_response() | template_responses(), {kz_term:ne_binary(), map()}) ->
+          {kz_term:ne_binary(), map()}.
+handle_notification_results([], Acc) ->
+    Acc;
+handle_notification_results([Result | Rest], Acc) when is_list(Result) ->
+    NewAcc = lists:foldl(fun check_result/2, Acc, Result),
+    handle_notification_results(Rest, NewAcc);
+handle_notification_results(Result, Acc) ->
+    lists:foldl(fun check_result/2, Acc, Result).
 
 -spec maybe_send_update(kz_json:object(), kz_term:ne_binary(), map()) -> 'ok'.
 maybe_send_update(JObj, RoutingKey, #{'completed' := _Completed}=Map) ->
@@ -150,7 +160,7 @@ check_result({'EXIT', {'error', {'badmatch',  _}}}, {RoutingKey, Map}) ->
 
 check_result({'EXIT', {'error', Reason}}, {RoutingKey, Map}) ->
     ReasonBin = try kz_term:to_binary(Reason)
-                catch _:_ -> <<"unknown error throw-ed">>
+                catch _:_ -> kz_binary:format("~p", [Reason])
                 end,
     {RoutingKey, maps:update_with('failed', update_with({RoutingKey, ReasonBin}), [{RoutingKey, ReasonBin}], Map)};
 
@@ -159,7 +169,8 @@ check_result({'EXIT', {_Exp, _ST}}, {RoutingKey, Map}) ->
     {RoutingKey, maps:update_with('failed', update_with({RoutingKey, Reason}), [{RoutingKey, Reason}], Map)};
 
 check_result(_Other, {RoutingKey, Map}) ->
-    Reason = <<"unknown_template_error">>,
+    Reason = kz_binary:format("unexpected result from template ~s: ~p", [RoutingKey, _Other]),
+    lager:debug("unexpected result from ~s: ~p", [RoutingKey, _Other]),
     {RoutingKey, maps:update_with('failed', update_with({RoutingKey, Reason}), [{RoutingKey, Reason}], Map)}.
 
 update_with(Value) -> fun(ResultList) -> [Value | ResultList] end.
