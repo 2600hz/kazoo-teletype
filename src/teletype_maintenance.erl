@@ -1,5 +1,5 @@
 %%%-----------------------------------------------------------------------------
-%%% @copyright (C) 2010-2020, 2600Hz
+%%% @copyright (C) 2010-2021, 2600Hz
 %%% @doc
 %%% @author James Aimonetti
 %%%
@@ -149,7 +149,7 @@ restore_system_templates() ->
     lists:foreach(fun restore_system_template/1, list_templates_from_db(?KZ_CONFIG_DB)).
 
 -spec restore_system_template(kz_term:ne_binary()) -> ok.
-restore_system_template(<<"skel">>) -> 'ok';
+restore_system_template(<<"notification.skel">>) -> 'ok';
 restore_system_template(TemplateId) ->
     DbId = kz_notification:db_id(TemplateId),
     ModId = kz_notification:resp_id(TemplateId),
@@ -184,7 +184,7 @@ list_templates_from_db(Db) ->
             [Id
              || Result <- Results,
                 Id <- [kz_doc:id(Result)],
-                'notification.skel' =/=  Id
+                <<"notification.skel">> =/=  Id
             ];
         {'error', _E} ->
             io:format("failed to query existing notifications: ~p~n", [_E]),
