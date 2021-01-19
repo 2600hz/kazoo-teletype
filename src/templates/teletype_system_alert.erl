@@ -1,5 +1,5 @@
 %%%-----------------------------------------------------------------------------
-%%% @copyright (C) 2015-2020, 2600Hz
+%%% @copyright (C) 2015-2021, 2600Hz
 %%% @doc
 %%% @author Peter Defebvre
 %%%
@@ -74,11 +74,11 @@ init() ->
     teletype_templates:init(?MODULE),
     teletype_bindings:bind(id(), ?MODULE, 'handle_req').
 
--spec handle_req(kz_json:object()) -> template_responses().
+-spec handle_req(kz_json:object()) -> template_response() | template_responses().
 handle_req(JObj) ->
     handle_req(JObj, kapi_notifications:system_alert_v(JObj)).
 
--spec handle_req(kz_json:object(), boolean()) -> template_responses().
+-spec handle_req(kz_json:object(), boolean()) -> template_response() | template_responses().
 handle_req(_, 'false') ->
     lager:debug("invalid data for ~s", [id()]),
     teletype_util:notification_failed(id(), <<"validation_failed">>);
