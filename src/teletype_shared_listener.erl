@@ -1,5 +1,5 @@
 %%%-----------------------------------------------------------------------------
-%%% @copyright (C) 2013-2020, 2600Hz
+%%% @copyright (C) 2013-2021, 2600Hz
 %%% @doc
 %%% This Source Code Form is subject to the terms of the Mozilla Public
 %%% License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -126,6 +126,7 @@ handle_event(JObj, _State) ->
 
 -spec handle_message(kz_json:object(), kz_term:proplist()) -> 'ok'.
 handle_message(JObj, _Props) ->
+    lager:debug("handling request for call_id ~p", [kz_log:find_callid(JObj)]),
     teletype_bindings:notification(JObj).
 
 %%------------------------------------------------------------------------------

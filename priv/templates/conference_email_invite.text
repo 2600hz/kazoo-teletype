@@ -1,0 +1,17 @@
+                Conference Invite
+
+
+{{invite.invite_message}}
+
+
+=== Conference Details ===
+
+Conference Name: {{invite.conference_name}}
+Conference Numbers: {{invite.conference_call_in_numbers|join:", "}}
+Conference Pins: {{invite.conference_participant_pins|join:", "}}
+Conference Link: {{invite.conference_link}}
+
+
+
+Sent from {{system.encoded_node}}
+
