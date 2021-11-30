@@ -170,7 +170,7 @@ macros(DataJObj) ->
 details_macros(DataJObj) ->
     case kz_json:get_value(<<"details">>, DataJObj) of
         'undefined' -> [];
-        <<_/binary>> = Details -> [{<<"details">>, [{<<"message">>, Details}]}];
+        <<Details/binary>> -> [{<<"details">>, [{<<"message">>, Details}]}];
         Details when is_list(Details) -> details_groups(Details);
         Details -> details_groups(kz_json:recursive_to_proplist(Details))
     end.
