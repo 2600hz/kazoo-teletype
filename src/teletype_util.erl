@@ -1,5 +1,5 @@
 %%%-----------------------------------------------------------------------------
-%%% @copyright (C) 2014-2020, 2600Hz
+%%% @copyright (C) 2014-2021, 2600Hz
 %%% @doc
 %%% @author James Aimonetti
 %%%
@@ -1044,10 +1044,14 @@ fetch_attachment_from_url(URL) ->
           when (_2xx - 200) < 100 -> %% ie: match "2"++_
             {'ok', attachment_from_url_result(Headers, Body)};
         {'ok', _Code, _Headers, _Body} ->
-            lager:debug("failed to get attachment from url ~s for reason: ~p : ~p", [URL, _Code, _Headers]),
+            lager:debug("failed to get attachment from url ~s for reason: ~p : ~p"
+                       ,[kz_log:redactor(URL), _Code, _Headers]
+                       ),
             {'error', 'not_handled'};
         Error ->
-            lager:debug("failed to get attachment from url ~s for reason: ~p", [URL, Error]),
+            lager:debug("failed to get attachment from url ~s for reason: ~p"
+                       ,[kz_log:redactor(URL), Error]
+                       ),
             Error
     end.
 
