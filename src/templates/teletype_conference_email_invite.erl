@@ -79,22 +79,23 @@ build_macro_data(DataJObj) ->
 
 -spec process_req(kz_json:object()) -> template_response().
 process_req(DataJObj) ->
-    Macros = build_macro_data(DataJObj),
+    NewObj = maybe_update(DataJObj),
+    Macros = build_macro_data(NewObj),
 
     %% Populate templates
-    RenderedTemplates = teletype_templates:render(?TEMPLATE_ID, Macros, DataJObj),
+    RenderedTemplates = teletype_templates:render(?TEMPLATE_ID, Macros, NewObj),
 
     {'ok', TemplateMetaJObj} =
         teletype_templates:fetch_notification(?TEMPLATE_ID
-                                             ,kapi_notifications:account_id(DataJObj)
+                                              ,kapi_notifications:account_id(NewObj)
                                              ),
 
-    Subject = teletype_util:render_subject(kz_json:find(<<"subject">>, [DataJObj, TemplateMetaJObj], ?TEMPLATE_SUBJECT)
+    Subject = teletype_util:render_subject(kz_json:find(<<"subject">>, [NewObj, TemplateMetaJObj], ?TEMPLATE_SUBJECT)
                                           ,Macros
                                           ),
 
-    Emails0 = teletype_util:find_addresses(DataJObj, TemplateMetaJObj, ?TEMPLATE_ID),
-    Emails = props:set_value(<<"to">>, get_email_address(DataJObj, Emails0), Emails0),
+    Emails0 = teletype_util:find_addresses(NewObj, TemplateMetaJObj, ?TEMPLATE_ID),
+    Emails = props:set_value(<<"to">>, get_email_address(NewObj, Emails0), Emails0),
 
     case teletype_util:send_email(Emails, Subject, RenderedTemplates) of
         'ok' -> teletype_util:notification_completed(?TEMPLATE_ID);
@@ -103,20 +104,38 @@ process_req(DataJObj) ->
 
 -spec get_email_address(kz_json:object(), kz_term:proplist()) -> kz_term:api_ne_binaries().
 get_email_address(DataJObj, Emails0) ->
-    ToEmails = props:get_value(<<"to">>, Emails0),
-    case kz_json:get_value(<<"guests">>, DataJObj) of
-        <<"Email">> ->
-            case teletype_util:is_preview(DataJObj) of
-                'true' -> ToEmails;
-                'false' -> []
-            end;
-        [] ->
-            ToEmails;
-        Emails when is_list(Emails) ->
-            case [E || E <- Emails, kz_term:is_ne_binary(E)] of
-                [] -> ToEmails;
-                Es -> Es
-            end;
-        _Other ->
-            ToEmails
-    end.
+  ToEmails = props:get_value(<<"to">>, Emails0),
+  case kz_json:get_value(<<"guests">>, DataJObj) of
+    <<"Email">> ->
+      case teletype_util:is_preview(DataJObj) of
+        'true' -> ToEmails;
+        'false' -> []
+      end;
+    [] ->
+      ToEmails;
+    Emails when is_list(Emails) ->
+      case [E || E <- Emails, kz_term:is_ne_binary(E)] of
+        [] -> ToEmails;
+        Es -> Es
+      end;
+    _Other ->
+      ToEmails
+  end.
+
+-spec  maybe_update(kz_json:object())-> kz_json:object().
+maybe_update(DataJObj) ->
+  NewDataJObj =  check_call_in_numbers(DataJObj, kz_json:get_value(<<"conference_call_in_numbers">>, DataJObj)),
+  check_participant_pins (NewDataJObj,  kz_json:get_value(<<"conference_participant_pins">>, NewDataJObj)).
+
+-spec check_call_in_numbers(kz_json:object(), kz_json:json_term() | 'undefined')-> kz_json:json_term() | 'undefined'.
+check_call_in_numbers(DataJObj, <<"Conference-Call-In-Numbers">>) ->
+  kz_json:set_value(<<"conference_call_in_numbers">>,[<<"undefinedconf">>],DataJObj);
+check_call_in_numbers(DataJObj, _ConferenceCallInNumbers) ->
+  DataJObj.
+
+-spec check_participant_pins(kz_json:object(), kz_json:json_term() | 'undefined')-> kz_json:json_term() | 'undefined'.
+check_participant_pins(DataJObj, <<"Conference-Participant-Pins">>) ->
+  kz_json:set_value(<<"conference_participant_pins">>,[<<"99999">>],DataJObj);
+check_participant_pins(DataJObj, _ConferenceParticipantPins) ->
+  DataJObj.
+
