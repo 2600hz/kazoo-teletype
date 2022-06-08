@@ -1,5 +1,5 @@
 %%%-----------------------------------------------------------------------------
-%%% @copyright (C) 2021-2021, 2600Hz
+%%% @copyright (C) 2021-2022, 2600Hz
 %%% @doc
 %%% This Source Code Form is subject to the terms of the Mozilla Public
 %%% License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -87,7 +87,7 @@ process_req(DataJObj) ->
 
     {'ok', TemplateMetaJObj} =
         teletype_templates:fetch_notification(?TEMPLATE_ID
-                                              ,kapi_notifications:account_id(NewObj)
+                                             ,kapi_notifications:account_id(NewObj)
                                              ),
 
     Subject = teletype_util:render_subject(kz_json:find(<<"subject">>, [NewObj, TemplateMetaJObj], ?TEMPLATE_SUBJECT)
@@ -104,38 +104,38 @@ process_req(DataJObj) ->
 
 -spec get_email_address(kz_json:object(), kz_term:proplist()) -> kz_term:api_ne_binaries().
 get_email_address(DataJObj, Emails0) ->
-  ToEmails = props:get_value(<<"to">>, Emails0),
-  case kz_json:get_value(<<"guests">>, DataJObj) of
-    <<"Email">> ->
-      case teletype_util:is_preview(DataJObj) of
-        'true' -> ToEmails;
-        'false' -> []
-      end;
-    [] ->
-      ToEmails;
-    Emails when is_list(Emails) ->
-      case [E || E <- Emails, kz_term:is_ne_binary(E)] of
-        [] -> ToEmails;
-        Es -> Es
-      end;
-    _Other ->
-      ToEmails
-  end.
+    ToEmails = props:get_value(<<"to">>, Emails0),
+    case kz_json:get_value(<<"guests">>, DataJObj) of
+        <<"Email">> ->
+            case teletype_util:is_preview(DataJObj) of
+                'true' -> ToEmails;
+                'false' -> []
+            end;
+        [] ->
+            ToEmails;
+        Emails when is_list(Emails) ->
+            case [E || E <- Emails, kz_term:is_ne_binary(E)] of
+                [] -> ToEmails;
+                Es -> Es
+            end;
+        _Other ->
+            ToEmails
+    end.
 
 -spec  maybe_update(kz_json:object())-> kz_json:object().
 maybe_update(DataJObj) ->
-  NewDataJObj =  check_call_in_numbers(DataJObj, kz_json:get_value(<<"conference_call_in_numbers">>, DataJObj)),
-  check_participant_pins (NewDataJObj,  kz_json:get_value(<<"conference_participant_pins">>, NewDataJObj)).
+    NewDataJObj =  check_call_in_numbers(DataJObj, kz_json:get_value(<<"conference_call_in_numbers">>, DataJObj)),
+    check_participant_pins (NewDataJObj,  kz_json:get_value(<<"conference_participant_pins">>, NewDataJObj)).
 
 -spec check_call_in_numbers(kz_json:object(), kz_json:json_term() | 'undefined')-> kz_json:json_term() | 'undefined'.
 check_call_in_numbers(DataJObj, <<"Conference-Call-In-Numbers">>) ->
-  kz_json:set_value(<<"conference_call_in_numbers">>,[<<"undefinedconf">>],DataJObj);
+    kz_json:set_value(<<"conference_call_in_numbers">>,[<<"undefinedconf">>],DataJObj);
 check_call_in_numbers(DataJObj, _ConferenceCallInNumbers) ->
-  DataJObj.
+    DataJObj.
 
 -spec check_participant_pins(kz_json:object(), kz_json:json_term() | 'undefined')-> kz_json:json_term() | 'undefined'.
 check_participant_pins(DataJObj, <<"Conference-Participant-Pins">>) ->
-  kz_json:set_value(<<"conference_participant_pins">>,[<<"99999">>],DataJObj);
+    kz_json:set_value(<<"conference_participant_pins">>,[<<"99999">>],DataJObj);
 check_participant_pins(DataJObj, _ConferenceParticipantPins) ->
-  DataJObj.
+    DataJObj.
 
