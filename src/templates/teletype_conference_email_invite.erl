@@ -120,5 +120,3 @@ get_email_address(DataJObj, Emails0) ->
         _Other ->
             ToEmails
     end.
-
-
