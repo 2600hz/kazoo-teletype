@@ -94,22 +94,21 @@ process_req(DataJObj) ->
                                           ),
 
     Emails0 = teletype_util:find_addresses(DataJObj, TemplateMetaJObj, ?TEMPLATE_ID),
-    Emails = props:set_value(<<"to">>, get_email_address(DataJObj, Emails0), Emails0),
+    Emails = props:set_value(<<"to">>, get_email_address(DataJObj, Emails0, teletype_util:is_preview(DataJObj)), Emails0),
 
     case teletype_util:send_email(Emails, Subject, RenderedTemplates) of
         'ok' -> teletype_util:notification_completed(?TEMPLATE_ID);
         {'error', Reason} -> teletype_util:notification_failed(?TEMPLATE_ID, Reason)
     end.
 
--spec get_email_address(kz_json:object(), kz_term:proplist()) -> kz_term:api_ne_binaries().
-get_email_address(DataJObj, Emails0) ->
+-spec get_email_address(kz_json:object(), kz_term:proplist(), boolean()) -> kz_term:api_ne_binaries().
+get_email_address(_DataJObj, Emails0, 'true') ->
+    props:get_value(<<"to">>, Emails0);
+get_email_address(DataJObj, Emails0, 'false') ->
     ToEmails = props:get_value(<<"to">>, Emails0),
     case kz_json:get_value(<<"guests">>, DataJObj) of
         <<"Email">> ->
-            case teletype_util:is_preview(DataJObj) of
-                'true' -> ToEmails;
-                'false' -> []
-            end;
+            [];
         [] ->
             ToEmails;
         Emails when is_list(Emails) ->
