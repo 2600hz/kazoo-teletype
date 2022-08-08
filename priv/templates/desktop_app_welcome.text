@@ -6,7 +6,7 @@ Hello {{user.first_name}} {{user.last_name}},
 Welcome to {{desktop.app_name}}, let's get you started!
 
 To download the app
-Log in to {{branding.account.domain}}
+Log in to {{branding.account.domain|default:"your portal"}}
 Open User Portal
 Navigate to the comm.land tab
 
