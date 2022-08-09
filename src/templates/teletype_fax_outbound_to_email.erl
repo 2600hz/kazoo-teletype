@@ -1,5 +1,5 @@
 %%%-----------------------------------------------------------------------------
-%%% @copyright (C) 2014-2020, 2600Hz
+%%% @copyright (C) 2014-2022, 2600Hz
 %%% @doc
 %%% @author James Aimonetti
 %%%
@@ -126,5 +126,6 @@ build_fax_template_data(DataJObj) ->
       ,{<<"box_id">>, kz_json:get_value(<<"faxbox_id">>, DataJObj, kz_doc:id(FaxBoxJObj))}
       ,{<<"box_name">>, kz_json:get_value(<<"name">>, FaxBoxJObj)}
       ,{<<"timestamp">>, kz_json:get_value(<<"fax_timestamp">>, DataJObj, kz_time:now_s())}
+      ,{<<"subject">>, kz_json:get_value(<<"subject">>, FaxJObj)}
       | kz_json:to_proplist(kz_json:get_value(<<"tx_result">>, FaxJObj, kz_json:new()))
       ]).
