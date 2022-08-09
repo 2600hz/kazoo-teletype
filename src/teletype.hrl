@@ -218,7 +218,7 @@
         ]).
 
 -define(FAX_OUTBOUND_MACROS
-       ,[?MACRO_VALUE(<<"fax.subject">>, <<"subject">>, <<"Fax Subject">>, <<"Fax Subject">>)
+       ,[?MACRO_VALUE(<<"fax.subject">>, <<"subject">>, <<"Fax Subject">>, <<"Original Email subject of the Outbound Fax">>)
         ]).
 
 -define(FAX_ERROR_MACROS

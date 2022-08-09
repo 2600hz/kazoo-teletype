@@ -52,6 +52,7 @@
         "transferred_pages": "1"
     },
     "source_type": "incoming_fax",
+    "subject": "Example outbound fax email subject",
     "timestamp": 63581844088,
     "to_number": "+14150000000"
 }
