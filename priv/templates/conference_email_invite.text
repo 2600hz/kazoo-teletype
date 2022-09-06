@@ -6,6 +6,7 @@
 
 === Conference Details ===
 
+Conference Id: {{invite.conference_id}}
 Conference Access Number: {{invite.conference_numbers}}
 Conference Name: {{invite.conference_name}}
 Conference Numbers: {{invite.conference_call_in_numbers|join:", "}}

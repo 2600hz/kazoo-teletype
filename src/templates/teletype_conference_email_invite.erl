@@ -19,7 +19,8 @@
 
 -define(TEMPLATE_MACROS
        ,kz_json:from_list(
-          [?MACRO_VALUE(<<"invite.conference_numbers">>, <<"conference_numbers">>, <<"Conference Numbers">>, <<"Conference Numbers">>)
+          [?MACRO_VALUE(<<"invite.conference_id">>, <<"conference_id">>, <<"Conference ID">>, <<"Conference ID">>)
+          ,?MACRO_VALUE(<<"invite.conference_numbers">>, <<"conference_numbers">>, <<"Conference Numbers">>, <<"Conference Numbers">>)
           ,?MACRO_VALUE(<<"invite.conference_name">>, <<"conference_name">>, <<"Conference Name">>, <<"Conference Name">>)
           ,?MACRO_VALUE(<<"invite.conference_link">>, <<"conference_link">>, <<"Conference Link">>, <<"Conference Link">>)
           ,?MACRO_VALUE(<<"invite.conference_call_in_numbers">>, <<"conference_call_in_numbers">>, <<"Conference Call-In Numbers">>, <<"Conference Call-In Numbers">>)
