@@ -1,11 +1,11 @@
 <mjml>
   <mj-head>
-    <mj-title>Welcome to {{desktop.app_name}}</mj-title>
+    <mj-title>Welcome to {{desktop.app_name|default:"comm.land"}}</mj-title>
     <mj-font href="https://fonts.googleapis.com/css?family=Open+Sans:100,400,700" />
   </mj-head>
   <mj-body background-color="#f3f3f5">
     <mj-raw>
-      <div style="display:none;font-size:1px;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;mso-hide:all;font-family:sans-serif;">Starting with {{desktop.app_name}}</div>
+      <div style="display:none;font-size:1px;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;mso-hide:all;font-family:sans-serif;">Starting with {{desktop.app_name|default:"comm.land"}}</div>
     </mj-raw>
     <mj-section padding-bottom="0px" padding-top="0">
       <mj-column>
@@ -25,7 +25,7 @@
     <mj-section background-color="#ffffff">
       <mj-column vertical-align="middle" width="100%">
         <mj-text align="left" color="#555555" font-weight="100" font-size="20px" font-family="Open Sans, Helvetica, Arial, sans-serif" line-height="20px">Hello {{user.first_name}}<br /><br /></mj-text>
-        <mj-text align="left" color="#555555" font-size="15px" font-family="Open Sans, Helvetica, Arial, sans-serif" line-height="20px">Welcome to <b>{{desktop.app_name}}</b>! First, lets get you started:</mj-text>
+        <mj-text align="left" color="#555555" font-size="15px" font-family="Open Sans, Helvetica, Arial, sans-serif" line-height="20px">Welcome to <b>{{desktop.app_name|default:"comm.land"}}</b>! First, lets get you started:</mj-text>
         <mj-text align="left" color="#555555" font-size="15px" font-family="Open Sans, Helvetica, Arial, sans-serif" line-height="20px">
           <ol>
             <li>
@@ -33,7 +33,7 @@
               <ul>
                 <li>Log in to {{branding.account.domain|default:"your portal"}}</li>
                 <li>Open User Portal</li>
-                <li>Navigate to <b>comm.io</b> tab</li>
+                <li>Navigate to <b>{{desktop.app_name|default:"comm.land"}}</b> tab</li>
                 <li>Download and install the app for your platform</li>
               </ul>
             </li>
@@ -60,7 +60,7 @@
     <mj-raw>{% if desktop.webphone_enabled %}</mj-raw>
     <mj-section background-color="#00AD55" background-color="#043768">
       <mj-column vertical-align="middle" width="100%">
-        <mj-text align="left" color="#ffffff" font-size="15px" font-family="Open Sans, Helvetica, Arial, sans-serif" line-height="20px">Additionally, you have access to the built-in webphone! Simply click the phone icon in {{desktop.app_name}} to get started making calls directly from your desktop.</mj-text>
+        <mj-text align="left" color="#ffffff" font-size="15px" font-family="Open Sans, Helvetica, Arial, sans-serif" line-height="20px">Additionally, you have access to the built-in webphone! Simply click the phone icon in {{desktop.app_name|default:"comm.land"}} to get started making calls directly from your desktop.</mj-text>
       </mj-column>
     </mj-section>
     <mj-raw>{% endif %}</mj-raw>

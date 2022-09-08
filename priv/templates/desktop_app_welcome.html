@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 
 <head>
-  <title> Welcome to {{desktop.app_name}}
+  <title> Welcome to {{desktop.app_name|default:"comm.land"}}
   </title>
   <!--[if !mso]><!-- -->
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -100,7 +100,7 @@
 
 <body style="background-color:#f3f3f5;">
   <div style="background-color:#f3f3f5;">
-    <div style="display:none;font-size:1px;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;mso-hide:all;font-family:sans-serif;">Starting with {{desktop.app_name}}</div>
+    <div style="display:none;font-size:1px;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;mso-hide:all;font-family:sans-serif;">Starting with {{desktop.app_name|default:"comm.land"}}</div>
     <!--[if mso | IE]>
       <table
          align="center" border="0" cellpadding="0" cellspacing="0" class="" style="width:600px;" width="600"
@@ -290,7 +290,7 @@
                   </tr>
                   <tr>
                     <td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word;">
-                      <div style="font-family:Open Sans, Helvetica, Arial, sans-serif;font-size:15px;line-height:20px;text-align:left;color:#555555;"> Welcome to <b>{{desktop.app_name}}</b>, let's get you started! </div>
+                      <div style="font-family:Open Sans, Helvetica, Arial, sans-serif;font-size:15px;line-height:20px;text-align:left;color:#555555;"> Welcome to <b>{{desktop.app_name|default:"comm.land"}}</b>, let's get you started! </div>
                     </td>
                   </tr>
                   <tr>
@@ -302,7 +302,7 @@
                             <ul>
                               <li>Log in to {{branding.account.domain|default:"your portal"}}</li>
                               <li>Open User Portal</li>
-                              <li>Navigate to <b>comm.land</b> tab</li>
+                              <li>Navigate to <b>{{desktop.app_name|default:"comm.land"}}</b> tab</li>
                             </ul>
                           </li>
                           <li>
@@ -324,7 +324,7 @@
                 </table>
               </div>
               <!--[if mso | IE]> {% if desktop.webphone_enabled %}
-            You also have access to the built-in webphone! Simply click the phone icon in {{desktop.app_name}} to start making calls directly from your desktop.
+            You also have access to the built-in webphone! Simply click the phone icon in {{desktop.app_name|default:"comm.land"}} to start making calls directly from your desktop.
             </td>
         </tr>
       
@@ -365,7 +365,7 @@
                 <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="vertical-align:middle;" width="100%">
                   <tr>
                     <td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word;">
-                      <div style="font-family:Open Sans, Helvetica, Arial, sans-serif;font-size:15px;line-height:20px;text-align:left;color:#ffffff;"> Additionally, you have access to the built-in webphone! Simply click the phone icon in {{desktop.app_name}} to get started making calls directly from your desktop. </div>
+                      <div style="font-family:Open Sans, Helvetica, Arial, sans-serif;font-size:15px;line-height:20px;text-align:left;color:#ffffff;"> Additionally, you have access to the built-in webphone! Simply click the phone icon in {{desktop.app_name|default:"comm.land"}} to get started making calls directly from your desktop. </div>
                     </td>
                   </tr>
                 </table>
