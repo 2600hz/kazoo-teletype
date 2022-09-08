@@ -124,7 +124,7 @@ create_macros(DataJObj) ->
                      Password -> [{<<"password">>, Password}|teletype_util:user_params(UserDoc)]
                  end,
 
-    DesktopMacros = [{<<"app_name">>, kz_json:get_ne_binary_value(<<"desktop_app_name">>, DataJObj, <<"comm.io">>)}
+    DesktopMacros = [{<<"app_name">>, kz_json:get_ne_binary_value(<<"desktop_app_name">>, DataJObj, <<"comm.land">>)}
                     ,{<<"webphone_enabled">>, kz_json:is_true(<<"webphone_enabled">>, DataJObj, 'false')}
                     ],
 

@@ -3,12 +3,12 @@
 
 Hello {{user.first_name}} {{user.last_name}},
 
-Welcome to {{desktop.app_name}}, let's get you started!
+Welcome to {{desktop.app_name|default:"comm.land"}}, let's get you started!
 
 To download the app
 Log in to {{branding.account.domain|default:"your portal"}}
 Open User Portal
-Navigate to the comm.land tab
+Navigate to the {{desktop.app_name|default:"comm.land"}} tab
 
 2. Sign in using the same credentials from Step 1
 
@@ -21,7 +21,7 @@ View and send faxes from your desktop
 
 
 {% if desktop.webphone_enabled %}
-You also have access to the built-in webphone! Simply click the phone icon in {{desktop.app_name}} to start making calls directly from your desktop.
+You also have access to the built-in webphone! Simply click the phone icon in {{desktop.app_name|default:"comm.land"}} to start making calls directly from your desktop.
 {% endif %}
 
 
