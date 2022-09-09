@@ -20,6 +20,7 @@
 -define(TEMPLATE_MACROS
        ,kz_json:from_list(
           [?MACRO_VALUE(<<"invite.conference_id">>, <<"conference_id">>, <<"Conference ID">>, <<"Conference ID">>)
+          ,?MACRO_VALUE(<<"invite.conference_numbers">>, <<"conference_numbers">>, <<"Conference Numbers">>, <<"Conference Numbers">>)
           ,?MACRO_VALUE(<<"invite.conference_name">>, <<"conference_name">>, <<"Conference Name">>, <<"Conference Name">>)
           ,?MACRO_VALUE(<<"invite.conference_link">>, <<"conference_link">>, <<"Conference Link">>, <<"Conference Link">>)
           ,?MACRO_VALUE(<<"invite.conference_call_in_numbers">>, <<"conference_call_in_numbers">>, <<"Conference Call-In Numbers">>, <<"Conference Call-In Numbers">>)
@@ -72,10 +73,14 @@ handle_req(JObj, 'true') ->
 
 -spec build_macro_data(kz_json:object()) -> kz_term:proplist().
 build_macro_data(DataJObj) ->
-    [{<<"system">>, teletype_util:system_params()}
-    ,{<<"account">>, teletype_util:account_params(DataJObj)}
-    ,{<<"invite">>, props:delete(<<"guests">>, kz_json:to_proplist(kz_api:remove_defaults(DataJObj)))}
-    ].
+    DataInviteToList = kz_json:to_proplist(kz_api:remove_defaults(DataJObj)),
+    ConferenceNumbers = props:get_value(<<"conference_numbers">>, DataInviteToList),
+    ConferenceNumbersFormatted = kz_binary:join(ConferenceNumbers,<<", ">>),
+    Response= [{<<"system">>, teletype_util:system_params()}
+              ,{<<"account">>, teletype_util:account_params(DataJObj)}
+              ,{<<"invite">>, props:delete(<<"guests">>, DataInviteToList)}
+              ],
+    props:set_value([<<"invite">>,<<"conference_numbers_formatted">>],ConferenceNumbersFormatted,Response).
 
 -spec process_req(kz_json:object()) -> template_response().
 process_req(DataJObj) ->
