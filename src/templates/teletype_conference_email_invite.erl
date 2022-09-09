@@ -73,10 +73,14 @@ handle_req(JObj, 'true') ->
 
 -spec build_macro_data(kz_json:object()) -> kz_term:proplist().
 build_macro_data(DataJObj) ->
-    [{<<"system">>, teletype_util:system_params()}
-    ,{<<"account">>, teletype_util:account_params(DataJObj)}
-    ,{<<"invite">>, props:delete(<<"guests">>, kz_json:to_proplist(kz_api:remove_defaults(DataJObj)))}
-    ].
+    DataInviteToList = kz_json:to_proplist(kz_api:remove_defaults(DataJObj)),
+    ConferenceNumbers = props:get_value(<<"conference_numbers">>, DataInviteToList),
+    ConferenceNumbersFormatted = kz_binary:join(ConferenceNumbers,<<",">>),
+    Response= [{<<"system">>, teletype_util:system_params()}
+              ,{<<"account">>, teletype_util:account_params(DataJObj)}
+              ,{<<"invite">>, props:delete(<<"guests">>, DataInviteToList)}
+              ],
+    props:set_value([<<"invite">>,<<"conference_numbers_formatted">>],ConferenceNumbersFormatted,Response).
 
 -spec process_req(kz_json:object()) -> template_response().
 process_req(DataJObj) ->
