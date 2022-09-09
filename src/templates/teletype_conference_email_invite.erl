@@ -85,8 +85,8 @@ build_macro_data(DataJObj) ->
 -spec process_req(kz_json:object()) -> template_response().
 process_req(DataJObj) ->
     Macros = build_macro_data(DataJObj),
-    %% Populate templates
 
+    %% Populate templates
     RenderedTemplates = teletype_templates:render(?TEMPLATE_ID, Macros, DataJObj),
 
     {'ok', TemplateMetaJObj} =
