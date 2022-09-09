@@ -25,7 +25,7 @@
     <mj-section background-color="#ffffff">
       <mj-column vertical-align="middle" width="100%">
         <mj-text align="left" color="#555555" font-weight="100" font-size="20px" font-family="Open Sans, Helvetica, Arial, sans-serif">Hello {{user.first_name}}<br /><br /></mj-text>
-        <mj-text align="left" color="#555555" font-size="15px" font-family="Open Sans, Helvetica, Arial, sans-serif" line-height="20px">You now have access to the webphone. Once you have installed <b>{{desktop.app_name}}</b> you'll see the webphone
+        <mj-text align="left" color="#555555" font-size="15px" font-family="Open Sans, Helvetica, Arial, sans-serif" line-height="20px">You now have access to the webphone. Once you have installed <b>{{desktop.app_name|default:"comm.land"}}</b> you'll see the webphone
           presented in the Toolbar. Simply, click on that to start using the webphone to make your first outbound call directly from your desktop.</mj-text>
         <mj-text align="left" color="#555555" font-size="15px" font-family="Open Sans, Helvetica, Arial, sans-serif" line-height="20px">Additionally, the webphone can be accessed from the tray icon and also by using these shortkeys:</mj-text>
         <mj-text align="left" color="#555555" font-size="15px" font-family="Open Sans, Helvetica, Arial, sans-serif" line-height="20px">
