@@ -4,7 +4,7 @@
 Hello {{user.first_name}}
 
 
-You now have access to the webphone. Once you have installed {{desktop.app_name}} you'll
+You now have access to the webphone. Once you have installed {{desktop.app_name|default:"comm.land"}} you'll
 see the webphone presented in the Toolbar. Simply, click on that to start using the webphone
 to make your first outbound call directly from your desktop.
 
