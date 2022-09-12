@@ -6,12 +6,10 @@
 
 === Conference Details ===
 
-Conference Id: {{invite.conference_id}}
-Conference Access Number: {{invite.conference_numbers_formatted}}
 Conference Name: {{invite.conference_name}}
-Conference Numbers: {{invite.conference_call_in_numbers|join:", "}}
-Conference Pins: {{invite.conference_participant_pins|join:", "}}
-Conference Link: {{invite.conference_link}}
+Conference Number(s): {{invite.conference_numbers_formatted}}
+Conference Pin(s): {{invite.conference_participant_pins|join:", "}}
+Conference Dial-in Number(s): {{invite.conference_call_in_numbers|join:", "}}
 
 
 
