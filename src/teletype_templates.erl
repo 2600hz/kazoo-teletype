@@ -1,5 +1,5 @@
 %%%-----------------------------------------------------------------------------
-%%% @copyright (C) 2014-2020, 2600Hz
+%%% @copyright (C) 2014-2022, 2600Hz
 %%% @doc
 %%% @author Peter Defebvre
 %%%
@@ -39,38 +39,38 @@
 %% @doc
 %% @end
 %%------------------------------------------------------------------------------
--spec init(module()) -> ok.
+-spec init(module()) -> 'ok'.
 init(Module)
   when is_atom(Module) ->
     init(Module:id(), params(Module)).
 
 -spec params(module() | kz_term:ne_binary()) -> kz_term:proplist().
 params(TemplateId=?NE_BINARY) ->
-    Module = kz_term:to_atom(<<(?APP_NAME)/binary, "_", TemplateId/binary>>, true),
+    Module = kz_term:to_atom(<<(?APP_NAME)/binary, "_", TemplateId/binary>>, 'true'),
     params(Module);
 params(Module)
   when is_atom(Module) ->
     TemplateId = Module:id(),
-    [{macros, Module:macros()}
-    ,{subject, Module:subject()}
-    ,{category, Module:category()}
-    ,{friendly_name, Module:friendly_name()}
-    ,{to, Module:to()}
-    ,{from, Module:from()}
-    ,{cc, Module:cc()}
-    ,{bcc, Module:bcc()}
-    ,{reply_to, Module:reply_to()}
-    ,{html, TemplateId}
-    ,{text, TemplateId}
+    [{'macros', Module:macros()}
+    ,{'subject', Module:subject()}
+    ,{'category', Module:category()}
+    ,{'friendly_name', Module:friendly_name()}
+    ,{'to', Module:to()}
+    ,{'from', Module:from()}
+    ,{'cc', Module:cc()}
+    ,{'bcc', Module:bcc()}
+    ,{'reply_to', Module:reply_to()}
+    ,{'html', TemplateId}
+    ,{'text', TemplateId}
     ].
 
 -spec init(kz_term:ne_binary(), init_params()) -> 'ok'.
 init(TemplateId, Params) ->
-    UpdatedParams = props:set_values([{'html', TemplateId}
-                                     ,{'text', TemplateId}
-                                     ]
-                                    ,Params
-                                    ),
+    UpdatedParams = props:insert_values([{'html', TemplateId}
+                                        ,{'text', TemplateId}
+                                        ]
+                                       ,Params
+                                       ),
     DocId = doc_id(TemplateId),
     lager:debug("init template ~s", [DocId]),
     case kz_datamgr:open_cache_doc(?KZ_CONFIG_DB, DocId) of
@@ -111,8 +111,8 @@ fetch_master_attachments(TemplateId) ->
 -spec fetch_attachments(kz_term:ne_binary(), kz_term:ne_binary()) -> template_attachments().
 fetch_attachments(TemplateId, Account) ->
     AccountDb = case ?KZ_CONFIG_DB =:= Account of
-                    true -> ?KZ_CONFIG_DB;
-                    false -> kzs_util:format_account_db(Account)
+                    'true' -> ?KZ_CONFIG_DB;
+                    'false' -> kzs_util:format_account_db(Account)
                 end,
     DocId = doc_id(TemplateId),
     case fetch_notification(TemplateId, AccountDb) of
@@ -698,7 +698,15 @@ write_template_to_disk(TemplateId, {Type, Template}) ->
     File = template_filename(TemplateId, Type),
     'ok' = file:write_file(File, Template).
 
--spec template_filename(kz_term:ne_binary(), 'html' | 'text') -> file:filename_all().
-template_filename(TemplateId, Type) ->
+-spec template_filename(kz_term:ne_binary() | {atom(), kz_term:ne_binary()}, 'html' | 'text') ->
+          file:filename_all().
+template_filename(<<TemplateId/binary>>, Type) ->
+    template_filename(?APP, TemplateId, Type);
+template_filename({App, TemplateId}, Type) ->
+    template_filename(App, TemplateId, Type).
+
+-spec template_filename(atom(), kz_term:ne_binary(), 'html' | 'text') ->
+          file:filename_all().
+template_filename(App, TemplateId, Type) ->
     Basename = iolist_to_binary([TemplateId, ".", kz_term:to_list(Type)]),
-    filename:join([code:priv_dir(?APP), "templates", Basename]).
+    filename:join([code:priv_dir(App), "templates", Basename]).
