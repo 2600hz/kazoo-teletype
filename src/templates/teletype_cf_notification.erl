@@ -1,5 +1,5 @@
 %%%-----------------------------------------------------------------------------
-%%% @copyright (C) 2014-2020, 2600Hz
+%%% @copyright (C) 2014-2023, 2600Hz
 %%% @doc
 %%% @author James Aimonetti
 %%% @author Sergey Safarov <s.safarov@gmail.com>, Sponsored by Audian
