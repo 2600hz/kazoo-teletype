@@ -11,7 +11,7 @@
 %%%-----------------------------------------------------------------------------
 -module(teletype_gen_email_template).
 
--include_lib("teletype.hrl").
+-include("teletype.hrl").
 
 
 -callback id() -> kz_term:ne_binary().
