@@ -51,3 +51,4 @@ erlang.mk
 
 /src/teletype_default_modules.hrl
 .apps.mk.*
+erlang_ls.config
