@@ -25,10 +25,6 @@ You also have access to the built-in webphone! Simply click the phone icon in {{
 {% endif %}
 
 
-If you have any suggestions on how we can improve, let us know at feedback@2600hz.com.
-
-
-
 Account Information
 
     Account ID: {{account.id}}
