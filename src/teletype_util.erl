@@ -324,6 +324,7 @@ smtp_options() ->
       ,{'no_mx_lookups', NoMxLookups}
       ,{'tls', smtp_tls_option(TLS)}
       ,{'ssl', SSL}
+      ,{'trace_fun', fun(Format, Args) -> lager:info(Format, Args) end}
       ]).
 
 -spec smtp_auth_option(kz_term:ne_binary()) -> atom().
