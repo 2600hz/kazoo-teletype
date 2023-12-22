@@ -1,5 +1,5 @@
 %%%-----------------------------------------------------------------------------
-%%% @copyright (C) 2015-2023, 2600Hz
+%%% @copyright (C) 2015-2024, 2600Hz
 %%% @doc
 %%% @author Peter Defebvre
 %%%
@@ -149,9 +149,10 @@ process_req_as_email(DataJObj) ->
                                          ),
 
     Attachments = teletype_util:maybe_get_attachments(DataJObj),
+    TemplateAccountId = teletype_util:get_template_account_id(TemplateMetaJObj, AccountId),
 
     put('skip_smtp_log', 'true'),
-    case teletype_util:send_email(Emails, Subject, RenderedTemplates, Attachments) of
+    case teletype_util:send_email(Emails, Subject, RenderedTemplates, TemplateAccountId, Attachments) of
         'ok' -> teletype_util:notification_completed(<<(id())/binary, "_email">>);
         {'error', Reason} -> teletype_util:notification_failed(<<(id())/binary, "_email">>, Reason)
     end.
