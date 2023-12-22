@@ -1,5 +1,5 @@
 %%%-----------------------------------------------------------------------------
-%%% @copyright (C) 2015-2023, 2600Hz
+%%% @copyright (C) 2015-2024, 2600Hz
 %%% @doc
 %%% @author Peter Defebvre
 %%%
@@ -108,7 +108,9 @@ handle_port_request(DataJObj) ->
     lager:debug("sending ~s to port sumbitter (or template default): ~p"
                ,[?TEMPLATE_ID, props:get_value(<<"to">>, Emails)]
                ),
-    _ = teletype_util:send_email(Emails, Subject, RenderedTemplates, EmailAttachements),
+    TemplateAccountId = teletype_util:get_template_account_id(TemplateMetaJObj, AccountId),
+
+    _ = teletype_util:send_email(Emails, Subject, RenderedTemplates, TemplateAccountId, EmailAttachements),
 
     AuthorityEmails = props:set_value(<<"to">>
                                      ,kz_json:get_value(<<"authority_emails">>, DataJObj, [])
@@ -119,7 +121,7 @@ handle_port_request(DataJObj) ->
                ,[?TEMPLATE_ID, props:get_value(<<"to">>, AuthorityEmails)]
                ),
     _ = put('skip_smtp_log', 'true'),
-    case teletype_util:send_email(AuthorityEmails, Subject, RenderedTemplates, EmailAttachements) of
+    case teletype_util:send_email(AuthorityEmails, Subject, RenderedTemplates, TemplateAccountId, EmailAttachements) of
         'ok' -> teletype_util:notification_completed(?TEMPLATE_ID);
         {'error', Reason} ->
             lager:debug("unable to send emails to port authority: ~p", [Reason]),

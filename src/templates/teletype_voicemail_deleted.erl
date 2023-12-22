@@ -1,5 +1,5 @@
 %%%-----------------------------------------------------------------------------
-%%% @copyright (C) 2014-2023, 2600Hz
+%%% @copyright (C) 2014-2024, 2600Hz
 %%% @doc
 %%% @author James Aimonetti
 %%% This Source Code Form is subject to the terms of the Mozilla Public
@@ -153,13 +153,13 @@ maybe_process_req(DataJObj) ->
     maybe_process_req(DataJObj, HasEmail).
 
 -spec maybe_process_req(kz_json:object(), boolean()) -> template_response().
-maybe_process_req(DataJObj, false) ->
+maybe_process_req(DataJObj, 'false') ->
     Msg = io_lib:format("requestor or box ~s has no emails or owner doesn't want emails"
                        ,[kz_json:get_value(<<"voicemail_box">>, DataJObj)]
                        ),
     lager:debug(Msg),
     teletype_util:notification_ignored(id());
-maybe_process_req(DataJObj, true) ->
+maybe_process_req(DataJObj, 'true') ->
     do_process_req(DataJObj).
 
 -spec do_process_req(kz_json:object()) -> template_response().
@@ -176,8 +176,9 @@ do_process_req(DataJObj) ->
     Subject0 = kz_json:find(<<"subject">>, [DataJObj, TemplateMetaJObj], subject()),
     Subject = teletype_util:render_subject(Subject0, Macros),
     Emails = teletype_util:find_addresses(DataJObj, TemplateMetaJObj, id()),
+    TemplateAccountId = teletype_util:get_template_account_id(TemplateMetaJObj, AccountId),
 
-    case teletype_util:send_email(Emails, Subject, RenderedTemplates, props:get_value(<<"attachments">>, Macros0)) of
+    case teletype_util:send_email(Emails, Subject, RenderedTemplates, TemplateAccountId, props:get_value(<<"attachments">>, Macros0)) of
         'ok' -> teletype_util:notification_completed(id());
         {'error', Reason} -> teletype_util:notification_failed(id(), Reason)
     end.
@@ -321,7 +322,7 @@ maybe_add_file_data(Macros, [{ContentType, FileName, Bin}]) ->
     Props = props:filter_undefined(
               [{<<"file_name">>, FileName}
               ,{<<"file_type">>, kz_mime:to_extension(ContentType)}
-              ,{<<"file_size">>, erlang:size(Bin)}
+              ,{<<"file_size">>, byte_size(Bin)}
               ]),
     VMF = props:set_values(Props, props:get_value(<<"voicemail">>, Macros, [])),
     props:set_value(<<"voicemail">>, VMF, Macros).

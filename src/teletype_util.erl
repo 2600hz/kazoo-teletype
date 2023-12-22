@@ -1,5 +1,5 @@
 %%%-----------------------------------------------------------------------------
-%%% @copyright (C) 2014-2023, 2600Hz
+%%% @copyright (C) 2014-2024, 2600Hz
 %%% @doc
 %%% @author James Aimonetti
 %%%
@@ -11,7 +11,7 @@
 %%%-----------------------------------------------------------------------------
 -module(teletype_util).
 
--export([send_email/3, send_email/4
+-export([send_email/3, send_email/4, send_email/5
         ,render_subject/2
         ,render/3
         ,system_params/0
@@ -50,6 +50,8 @@
 
         ,maybe_get_attachments/1
         ,fetch_attachment_from_url/1
+
+        ,get_template_account_id/2
         ]).
 
 -include("teletype.hrl").
@@ -65,11 +67,16 @@
 -spec send_email(email_map(), kz_term:ne_binary(), rendered_templates()) ->
           'ok' | {'error', any()}.
 send_email(Emails, Subject, RenderedTemplates) ->
-    send_email(Emails, Subject, RenderedTemplates, []).
+    send_email(Emails, Subject, RenderedTemplates, 'undefined', []).
 
--spec send_email(email_map(), kz_term:ne_binary(), rendered_templates(), attachments()) ->
+-spec send_email(email_map(), kz_term:ne_binary(), rendered_templates(), kz_term:api_ne_binary()) ->
           'ok' | {'error', any()}.
-send_email(Emails0, Subject, RenderedTemplates, Attachments) ->
+send_email(Emails, Subject, RenderedTemplates, AccountId) ->
+    send_email(Emails, Subject, RenderedTemplates, AccountId, []).
+
+-spec send_email(email_map(), kz_term:ne_binary(), rendered_templates(), kz_term:api_ne_binary(), attachments()) ->
+          'ok' | {'error', any()}.
+send_email(Emails0, Subject, RenderedTemplates, AccountId, Attachments) ->
     Emails = [{Key, lists:usort(KeyEmails)} || {Key, KeyEmails} <- Emails0, KeyEmails =/= 'undefined'],
     ?LOG_DEBUG("emails: ~p", [Emails]),
     To = props:get_value(<<"to">>, Emails),
@@ -91,7 +98,8 @@ send_email(Emails0, Subject, RenderedTemplates, Attachments) ->
              | add_attachments(Attachments)
              ]
             },
-    case relay_email(To, From, Email) of
+    Options = set_dkim_options(AccountId),
+    case relay_email(To, From, Email, Options) of
         {'ok', Receipt} ->
             maybe_log_smtp(Emails, Subject, RenderedTemplates, Receipt, 'undefined');
         {'error', {'error', Reason} = E} ->
@@ -188,7 +196,7 @@ email_parameters([{_Key, 'undefined'}|T], Params) ->
 email_parameters([{Key, V}|T], Params) ->
     email_parameters(T, [{Key, V} | Params]).
 
--spec relay_email(kz_term:api_binaries(), kz_term:ne_binary(), mimemail:mimetuple()) ->
+-spec relay_email(kz_term:api_binaries(), kz_term:ne_binary(), mimemail:mimetuple(), kz_term:proplist()) ->
           {'ok', kz_term:ne_binary()} |
           {'error', any()}.
 relay_email(To, From, {_Type
@@ -196,9 +204,9 @@ relay_email(To, From, {_Type
                       ,Addresses
                       ,_ContentTypeParams
                       ,_Body
-                      }=Email
+                      }=Email, Options
            ) ->
-    try mimemail:encode(Email) of
+    try mimemail:encode(Email, Options) of
         Encoded ->
             RelayResult = relay_encoded_email(To, From, Encoded),
             maybe_relay_to_bcc(From, Encoded, props:get_value(<<"Bcc">>, Addresses)),
@@ -1068,3 +1076,62 @@ attachment_from_url_result(Headers, Body) ->
                    FileDisposition -> FileDisposition
                end,
     {CT, Filename, Body}.
+
+-spec set_dkim_options(kz_term:api_ne_binary()) -> kz_term:proplist().
+set_dkim_options('undefined') -> [];
+set_dkim_options(AccountId) ->
+    case kzd_whitelabel:fetch(AccountId) of
+        {'ok', Doc} ->
+            set_dkim_options(AccountId, WhiteLabelJObj);
+        {'error', _E} ->
+            lager:debug("failed to fetch whitelabel doc for ~s: ~p", [AccountId, _E]),
+            []
+    end.
+
+set_dkim_options(AccountId, WhiteLabelJObj) ->
+    case kzd_whitelabel:dkim_key_id(WhiteLabelJObj) of
+        'undefined' -> [];
+        PvtKeyFileId ->
+            set_dkim_options(read_pem_file(AccountId, PvtKeyFileId)
+                            ,kzd_whitelabel:dkim_selector(WhiteLabelJObj)
+                            ,kzd_whitelabel:domain(WhiteLabelJObj)
+                            )
+    end.
+
+-spec read_pem_file(kz_term:ne_binary(), kz_term:ne_binary()) -> kz_term:api_ne_binary().
+read_pem_file(AccountId, PvtKeyFileId) ->
+    case kz_datamgr:fetch_attachment(kzs_util:format_account_db(AccountId)
+                                    ,{<<"dkim_key">>, PvtKeyFileId}
+                                    ,<<"pem">>
+                                    )
+    of
+        {'ok', PvtKey} -> PvtKey;
+        {'error', _Reason} ->
+            lager:debug("unable to open DKIM pem file ~s/~s: ~p"
+                       ,[AccountId, PvtKeyFileId, _Reason]
+                       ),
+            'undefined'
+    end.
+
+-spec set_dkim_options(kz_term:api_ne_binary(), kz_term:api_ne_binary(), kz_term:api_ne_binary()) ->
+          kz_term:proplist().
+set_dkim_options(PvtKey, DKIMSelector, Domain)
+  when PvtKey =:= 'undefined'
+       orelse DKIMSelector =:= 'undefined'
+       orelse Domain =:= 'undefined' ->
+    [];
+set_dkim_options(PvtKey, DKIMSelector, Domain) ->
+    DKIMOptions = [{'s', DKIMSelector}
+                  ,{'d', Domain}
+                  ,{'private_key', {'pem_plain', PvtKey}}
+                  ],
+    [{'dkim', DKIMOptions}].
+
+-spec get_template_account_id(kz_json:object(), kz_term:ne_binary()) -> kz_term:ne_binary().
+get_template_account_id(TemplateMetaJObj, AccountId) ->
+    case kz_doc:account_id(TemplateMetaJObj, AccountId) of
+        <<"system_config">> ->
+            AccountId;
+        TemplateAccountId ->
+            TemplateAccountId
+    end.

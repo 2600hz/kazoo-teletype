@@ -1,5 +1,5 @@
 %%%-----------------------------------------------------------------------------
-%%% @copyright (C) 2014-2023, 2600Hz
+%%% @copyright (C) 2014-2024, 2600Hz
 %%% @doc
 %%% @author James Aimonetti
 %%% @author Kirill Sysoev
@@ -134,13 +134,16 @@ send_update_to_user(UserJObj, DataJObj) ->
 
     RenderedTemplates =
         teletype_templates:render(maybe_expand_template_id(DataJObj), Macros, DataJObj, maybe_tpls_provided(DataJObj)),
+    AccountId = kapi_notifications:account_id(DataJObj),
     {'ok', TemplateMetaJObj} =
-        teletype_templates:fetch_notification(maybe_expand_template_id(DataJObj), kapi_notifications:account_id(DataJObj)),
+        teletype_templates:fetch_notification(maybe_expand_template_id(DataJObj), AccountId),
 
     Subject = teletype_util:render_subject(kz_json:find(<<"subject">>, [DataJObj, TemplateMetaJObj]), Macros),
     DefaultEmails = teletype_util:find_addresses(DataJObj, TemplateMetaJObj, maybe_expanded_config_id(DataJObj)),
     Emails = maybe_replace_to_field(DefaultEmails, kz_json:get_value(<<"email">>, UserJObj)),
-    case teletype_util:send_email(Emails, Subject, RenderedTemplates) of
+    TemplateAccountId = teletype_util:get_template_account_id(TemplateMetaJObj, AccountId),
+
+    case teletype_util:send_email(Emails, Subject, RenderedTemplates, TemplateAccountId) of
         'ok' -> teletype_util:notification_completed(?TEMPLATE_ID);
         {'error', Reason} -> teletype_util:notification_failed(?TEMPLATE_ID, Reason)
     end.
