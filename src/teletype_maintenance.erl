@@ -165,12 +165,12 @@ restore_system_template(TemplateId) ->
     try Mod:init() of
         'ok' -> io:format("  finished~n")
     catch
-        ?STACKTRACE(_E, _T, ST)
-        io:format("  crashed for reason ~p:~p ~n", [_E, _T]),
-        kz_log:log_stacktrace(ST),
-        io:format("St: ~p~n~n", [ST])
+        _E:_R:ST ->
+            io:format("  crashed for reason ~p:~p ~n", [_E, _R]),
+            kz_log:log_stacktrace(ST),
+            io:format("St: ~p~n~n", [ST])
 
-        end.
+    end.
 
 -spec list_templates_from_db(kz_term:ne_binary()) -> kz_term:ne_binaries().
 list_templates_from_db(Db) ->
@@ -269,13 +269,13 @@ start_module(Module) when is_atom(Module) ->
     try Module:init() of
         _ -> maybe_add_module_to_autoload(Module)
     catch
-        ?STACKTRACE(_Type, Reason, ST)
-        lager:error("failed to start teletype module ~s with reason: ~s ~p"
-                   ,[Module, _Type, Reason]
-                   ),
-        kz_log:log_stacktrace(ST),
-        {'error', Reason}
-        end;
+        _Type:Reason:ST ->
+            lager:error("failed to start teletype module ~s with reason: ~s ~p"
+                       ,[Module, _Type, Reason]
+                       ),
+            kz_log:log_stacktrace(ST),
+            {'error', Reason}
+    end;
 start_module(Module) ->
     case module_from_binary(Module) of
         {'ok', Atom} -> start_module(Atom);
