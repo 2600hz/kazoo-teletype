@@ -1081,7 +1081,7 @@ attachment_from_url_result(Headers, Body) ->
 set_dkim_options('undefined') -> [];
 set_dkim_options(AccountId) ->
     case kzd_whitelabel:fetch(AccountId) of
-        {'ok', Doc} ->
+        {'ok', WhiteLabelJObj} ->
             set_dkim_options(AccountId, WhiteLabelJObj);
         {'error', _E} ->
             lager:debug("failed to fetch whitelabel doc for ~s: ~p", [AccountId, _E]),
