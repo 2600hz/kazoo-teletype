@@ -1,5 +1,5 @@
 %%%-----------------------------------------------------------------------------
-%%% @copyright (C) 2014-2023, 2600Hz
+%%% @copyright (C) 2014-2024, 2600Hz
 %%% @doc
 %%% @author James Aimonetti
 %%%
@@ -101,8 +101,9 @@ process_req(DataJObj, TemplateId, TemplateMetaJObj) ->
         end,
 
     Emails = teletype_util:find_addresses(EmailsJObj, TemplateMetaJObj, TemplateId),
+    TemplateAccountId = teletype_util:get_template_account_id(TemplateMetaJObj, kapi_notifications:account_id(DataJObj)),
 
-    case teletype_util:send_email(Emails, Subject, RenderedTemplates, EmailAttachements) of
+    case teletype_util:send_email(Emails, Subject, RenderedTemplates, TemplateAccountId, EmailAttachements) of
         'ok' -> teletype_util:notification_completed(TemplateId);
         {'error', Reason} -> teletype_util:notification_failed(TemplateId, Reason)
     end.

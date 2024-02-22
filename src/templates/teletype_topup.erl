@@ -1,5 +1,5 @@
 %%%-----------------------------------------------------------------------------
-%%% @copyright (C) 2014-2023, 2600Hz
+%%% @copyright (C) 2014-2024, 2600Hz
 %%% @doc
 %%% @author Pierre Fenoll
 %%%
@@ -95,12 +95,14 @@ process_req(DataJObj) ->
     Macros = macros(DataJObj),
     RenderedTemplates = teletype_templates:render(?TEMPLATE_ID, Macros, DataJObj),
 
-    {'ok', TemplateMetaJObj} = teletype_templates:fetch_notification(?TEMPLATE_ID, kapi_notifications:account_id(DataJObj)),
+    AccountId = kapi_notifications:account_id(DataJObj),
+    {'ok', TemplateMetaJObj} = teletype_templates:fetch_notification(?TEMPLATE_ID, AccountId),
     Subject0 = kz_json:find(<<"subject">>, [DataJObj, TemplateMetaJObj]),
     Subject = teletype_util:render_subject(Subject0, Macros),
     Emails = teletype_util:find_addresses(DataJObj, TemplateMetaJObj, ?TEMPLATE_ID),
+    TemplateAccountId = teletype_util:get_template_account_id(TemplateMetaJObj, AccountId),
 
-    case teletype_util:send_email(Emails, Subject, RenderedTemplates) of
+    case teletype_util:send_email(Emails, Subject, RenderedTemplates, TemplateAccountId) of
         'ok' -> teletype_util:notification_completed(?TEMPLATE_ID);
         {'error', Reason} -> teletype_util:notification_failed(?TEMPLATE_ID, Reason)
     end.
@@ -168,5 +170,5 @@ purchase_order(DataJObj) ->
     binary:replace(kz_json:get_ne_binary_value(<<"purchase_order">>, DataJObj, <<>>)
                   ,<<"_">>
                   ,<<" ">>
-                  ,[global]
+                  ,['global']
                   ).

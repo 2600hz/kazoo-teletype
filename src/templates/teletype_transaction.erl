@@ -1,5 +1,5 @@
 %%%-----------------------------------------------------------------------------
-%%% @copyright (C) 2014-2023, 2600Hz
+%%% @copyright (C) 2014-2024, 2600Hz
 %%% @doc
 %%% @author Pierre Fenoll
 %%%
@@ -110,8 +110,9 @@ process_req(DataJObj, TemplateId) ->
     Subject = teletype_util:render_subject(kz_json:find(<<"subject">>, [DataJObj, TemplateMetaJObj]), Macros),
 
     Emails = teletype_util:find_addresses(DataJObj, TemplateMetaJObj, ?TEMPLATE_ID),
+    TemplateAccountId = teletype_util:get_template_account_id(TemplateMetaJObj, AccountId),
 
-    case teletype_util:send_email(Emails, Subject, RenderedTemplates) of
+    case teletype_util:send_email(Emails, Subject, RenderedTemplates, TemplateAccountId) of
         'ok' -> teletype_util:notification_completed(TemplateId);
         {'error', Reason} -> teletype_util:notification_failed(TemplateId, Reason)
     end.
@@ -180,7 +181,7 @@ purchase_order(DataJObj) ->
     binary:replace(kz_json:get_ne_binary_value(<<"purchase_order">>, DataJObj, <<>>)
                   ,<<"_">>
                   ,<<" ">>
-                  ,[global]
+                  ,['global']
                   ).
 
 -spec calculate_total(kz_term:api_objects() | binary()) -> non_neg_integer().

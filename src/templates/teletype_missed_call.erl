@@ -1,5 +1,5 @@
 %%%-----------------------------------------------------------------------------
-%%% @copyright (C) 2010-2023, 2600Hz
+%%% @copyright (C) 2010-2024, 2600Hz
 %%% @doc
 %%% This Source Code Form is subject to the terms of the Mozilla Public
 %%% License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -97,8 +97,9 @@ process_req(DataJObj) ->
          ),
 
     Emails = teletype_util:find_addresses(DataJObj, TemplateMetaJObj, ?TEMPLATE_ID),
+    TemplateAccountId = teletype_util:get_template_account_id(TemplateMetaJObj, AccountId),
 
-    case teletype_util:send_email(Emails, Subject, RenderedTemplates) of
+    case teletype_util:send_email(Emails, Subject, RenderedTemplates, TemplateAccountId) of
         'ok' -> teletype_util:notification_completed(?TEMPLATE_ID);
         {'error', Reason} -> teletype_util:notification_failed(?TEMPLATE_ID, Reason)
     end.

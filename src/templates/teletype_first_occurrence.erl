@@ -1,5 +1,5 @@
 %%%-----------------------------------------------------------------------------
-%%% @copyright (C) 2010-2023, 2600Hz
+%%% @copyright (C) 2010-2024, 2600Hz
 %%% @doc
 %%% @author Hesaam Farhang
 %%%
@@ -89,15 +89,17 @@ process_req(DataJObj) ->
     %% Load templates
     RenderedTemplates = teletype_templates:render(?TEMPLATE_ID, Macros, DataJObj),
 
-    {'ok', TemplateMetaJObj} = teletype_templates:fetch_notification(?TEMPLATE_ID, kapi_notifications:account_id(DataJObj)),
+    AccountId = kapi_notifications:account_id(DataJObj),
+    {'ok', TemplateMetaJObj} = teletype_templates:fetch_notification(?TEMPLATE_ID, AccountId),
 
     Subject = teletype_util:render_subject(kz_json:find(<<"subject">>, [DataJObj, TemplateMetaJObj])
                                           ,Macros
                                           ),
 
     Emails = teletype_util:find_addresses(DataJObj, TemplateMetaJObj, ?TEMPLATE_ID),
+    TemplateAccountId = teletype_util:get_template_account_id(TemplateMetaJObj, AccountId),
 
-    case teletype_util:send_email(Emails, Subject, RenderedTemplates) of
+    case teletype_util:send_email(Emails, Subject, RenderedTemplates, TemplateAccountId) of
         'ok' -> teletype_util:notification_completed(?TEMPLATE_ID);
         {'error', Reason} -> teletype_util:notification_failed(?TEMPLATE_ID, Reason)
     end.

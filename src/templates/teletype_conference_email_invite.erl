@@ -1,5 +1,5 @@
 %%%-----------------------------------------------------------------------------
-%%% @copyright (C) 2021-2023, 2600Hz
+%%% @copyright (C) 2021-2024, 2600Hz
 %%% @doc
 %%% This Source Code Form is subject to the terms of the Mozilla Public
 %%% License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -93,9 +93,10 @@ process_req(DataJObj) ->
     %% Populate templates
     RenderedTemplates = teletype_templates:render(?TEMPLATE_ID, Macros, DataJObj),
 
+    AccountId = kapi_notifications:account_id(DataJObj),
     {'ok', TemplateMetaJObj} =
         teletype_templates:fetch_notification(?TEMPLATE_ID
-                                             ,kapi_notifications:account_id(DataJObj)
+                                             ,AccountId
                                              ),
 
     Subject = teletype_util:render_subject(kz_json:find(<<"subject">>, [DataJObj, TemplateMetaJObj], ?TEMPLATE_SUBJECT)
@@ -104,8 +105,9 @@ process_req(DataJObj) ->
 
     Emails0 = teletype_util:find_addresses(DataJObj, TemplateMetaJObj, ?TEMPLATE_ID),
     Emails = props:set_value(<<"to">>, get_email_address(DataJObj, Emails0, teletype_util:is_preview(DataJObj)), Emails0),
+    TemplateAccountId = teletype_util:get_template_account_id(TemplateMetaJObj, AccountId),
 
-    case teletype_util:send_email(Emails, Subject, RenderedTemplates) of
+    case teletype_util:send_email(Emails, Subject, RenderedTemplates, TemplateAccountId) of
         'ok' -> teletype_util:notification_completed(?TEMPLATE_ID);
         {'error', Reason} -> teletype_util:notification_failed(?TEMPLATE_ID, Reason)
     end.

@@ -1,5 +1,5 @@
 %%%-----------------------------------------------------------------------------
-%%% @copyright (C) 2014-2023, 2600Hz
+%%% @copyright (C) 2014-2024, 2600Hz
 %%% @doc
 %%% @author James Aimonetti
 %%% @author Sergey Safarov <s.safarov@gmail.com>, Sponsored by Audian
@@ -73,15 +73,17 @@ process_req(DataJObj, TemplateId) ->
                          || {ContentType, Template} <- Templates
                         ],
 
-    {'ok', TemplateMetaJObj} = teletype_templates:fetch_notification(TemplateId, kapi_notifications:account_id(DataJObj)),
+    AccountId = kapi_notifications:account_id(DataJObj),
+    {'ok', TemplateMetaJObj} = teletype_templates:fetch_notification(TemplateId, AccountId),
 
     Subject = teletype_util:render_subject(kz_json:find(<<"subject">>, [DataJObj, TemplateMetaJObj])
                                           ,Macros
                                           ),
 
     Emails = teletype_util:find_addresses(DataJObj, TemplateMetaJObj, TemplateId),
+    TemplateAccountId = teletype_util:get_template_account_id(TemplateMetaJObj, AccountId),
 
-    case teletype_util:send_email(Emails, Subject, RenderedTemplates) of
+    case teletype_util:send_email(Emails, Subject, RenderedTemplates, TemplateAccountId) of
         'ok' -> teletype_util:notification_completed(TemplateId);
         {'error', Reason} -> teletype_util:notification_failed(TemplateId, Reason)
     end.
