@@ -1,0 +1,9 @@
+                Email Verification
+
+
+Hello,
+
+We received a request to verify your email address.
+If you did not make this request, just ignore this email. Otherwise, please use below code to verify your email address:
+
+{{verification_code}}

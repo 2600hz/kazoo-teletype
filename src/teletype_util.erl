@@ -98,8 +98,7 @@ send_email(Emails0, Subject, RenderedTemplates, AccountId, Attachments) ->
              | add_attachments(Attachments)
              ]
             },
-    Options = set_dkim_options(AccountId),
-
+    Options = maybe_set_dkim_options(AccountId, From),
     case relay_email(To, From, Email, Options) of
         {'ok', Receipt} ->
             maybe_log_smtp(Emails, Subject, RenderedTemplates, Receipt, 'undefined');
@@ -1085,38 +1084,42 @@ attachment_from_url_result(Headers, Body) ->
                end,
     {CT, Filename, Body}.
 
--spec set_dkim_options(kz_term:api_ne_binary()) -> kz_term:proplist().
-set_dkim_options('undefined') -> [];
-set_dkim_options(AccountId) ->
+-spec maybe_set_dkim_options(kz_term:api_ne_binary(), kz_term:ne_binary() | kz_term:ne_binaries()) -> kz_term:proplist().
+maybe_set_dkim_options('undefined', _From) -> [];
+maybe_set_dkim_options(AccountId, [From|_]) ->
+    maybe_set_dkim_options(AccountId, From);
+maybe_set_dkim_options(AccountId, From) ->
     case kzd_whitelabel:fetch(AccountId) of
         {'ok', WhiteLabelJObj} ->
-            set_dkim_options(AccountId, WhiteLabelJObj);
+            maybe_set_dkim_options(AccountId, From, WhiteLabelJObj);
         {'error', _E} ->
             lager:debug("failed to fetch whitelabel doc for ~s: ~p", [AccountId, _E]),
             []
     end.
 
-set_dkim_options(AccountId, WhiteLabelJObj) ->
-    case kzd_whitelabel:dkim_key_id(WhiteLabelJObj) of
+-spec maybe_set_dkim_options(kz_term:api_ne_binary(), kz_term:ne_binary(), kz_json:object()) ->
+          kz_term:proplist().
+maybe_set_dkim_options(AccountId, From, WhiteLabelJObj) ->
+    case kzd_emails:fetch(AccountId, From) of
         'undefined' -> [];
-        PvtKeyFileId ->
-            set_dkim_options(read_pem_file(AccountId, PvtKeyFileId)
-                            ,kzd_whitelabel:dkim_selector(WhiteLabelJObj)
+        EmailJObj ->
+            set_dkim_options(read_pem_file(AccountId, kz_doc:id(EmailJObj))
+                            ,kzd_emails:dkim_selector(EmailJObj)
                             ,kzd_whitelabel:domain(WhiteLabelJObj)
                             )
     end.
 
 -spec read_pem_file(kz_term:ne_binary(), kz_term:ne_binary()) -> kz_term:api_ne_binary().
-read_pem_file(AccountId, PvtKeyFileId) ->
+read_pem_file(AccountId, DocId) ->
     case kz_datamgr:fetch_attachment(kzs_util:format_account_db(AccountId)
-                                    ,{<<"dkim_key">>, PvtKeyFileId}
-                                    ,<<"pem">>
+                                    ,{kzd_emails:type(), DocId}
+                                    ,kzd_emails:dkim_filename()
                                     )
     of
         {'ok', PvtKey} -> PvtKey;
         {'error', _Reason} ->
             lager:debug("unable to open DKIM pem file ~s/~s: ~p"
-                       ,[AccountId, PvtKeyFileId, _Reason]
+                       ,[AccountId, DocId, _Reason]
                        ),
             'undefined'
     end.
