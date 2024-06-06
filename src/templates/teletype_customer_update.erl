@@ -100,7 +100,7 @@ process_accounts(DataJObj) ->
         {'error', Reason} ->
             Msg = io_lib:format("failed to load children. error: ~p", [Reason]),
             lager:info(Msg),
-            [{'error', kz_term:to_binary(Msg), ?TEMPLATE_ID}]
+            [teletype_util:notification_failed(kz_term:to_binary(Msg), ?TEMPLATE_ID)]
     end.
 
 -spec process_account(kz_term:ne_binary(), kz_json:object()) -> template_responses().

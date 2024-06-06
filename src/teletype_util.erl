@@ -80,7 +80,7 @@ send_email(Emails0, Subject, RenderedTemplates, AccountId, Attachments) ->
     Emails = [{Key, lists:usort(KeyEmails)} || {Key, KeyEmails} <- Emails0, KeyEmails =/= 'undefined'],
     ?LOG_DEBUG("emails: ~p", [Emails]),
     To = props:get_value(<<"to">>, Emails),
-    From = props:get_value(<<"from">>, Emails),
+    From = props:get_ne_binary_value(<<"from">>, Emails),
     Email = {<<"multipart">>
             ,<<"mixed">>
             ,email_parameters([{<<"To">>, To}
@@ -99,6 +99,7 @@ send_email(Emails0, Subject, RenderedTemplates, AccountId, Attachments) ->
              ]
             },
     Options = set_dkim_options(AccountId),
+
     case relay_email(To, From, Email, Options) of
         {'ok', Receipt} ->
             maybe_log_smtp(Emails, Subject, RenderedTemplates, Receipt, 'undefined');
@@ -199,13 +200,16 @@ email_parameters([{Key, V}|T], Params) ->
 -spec relay_email(kz_term:api_binaries(), kz_term:ne_binary(), mimemail:mimetuple(), kz_term:proplist()) ->
           {'ok', kz_term:ne_binary()} |
           {'error', any()}.
-relay_email(To, From, {_Type
-                      ,_SubType
-                      ,Addresses
-                      ,_ContentTypeParams
-                      ,_Body
-                      }=Email, Options
-           ) ->
+relay_email(To
+           ,From
+           ,{_Type
+            ,_SubType
+            ,Addresses
+            ,ContentTypeParams
+            ,_Body
+            }=Email
+           ,Options
+           ) when is_list(ContentTypeParams) ->
     try mimemail:encode(Email, Options) of
         Encoded ->
             RelayResult = relay_encoded_email(To, From, Encoded),
@@ -238,7 +242,8 @@ relay_to_bcc(From, Encoded, Bcc) ->
     relay_encoded_email(Bcc, From, Encoded).
 
 -spec relay_encoded_email(kz_term:api_binaries(), kz_term:ne_binary(), kz_term:ne_binary()) ->
-          {'ok', kz_term:ne_binary()} | {'error', any()}.
+          {'ok', kz_term:ne_binary()} |
+          {'error', any()}.
 relay_encoded_email('undefined', _From, _Encoded) ->
     lager:debug("failed to send email as the TO address(es) are missing"),
     {'error', 'invalid_to_addresses'};
@@ -251,7 +256,7 @@ relay_encoded_email(To, From, Encoded) ->
 
 -type gen_smtp_send_resp() :: {'ok', pid()} | {'error', any()} | pid().
 
--spec send(kz_term:binaries(), kz_term:ne_binary(), kz_term:ne_binary()) -> gen_smtp_send_resp().
+-spec send(kz_term:ne_binaries(), kz_term:ne_binary(), kz_term:ne_binary()) -> gen_smtp_send_resp().
 send(To, From, Encoded) ->
     Self = self(),
     gen_smtp_client:send({From, To, Encoded}
@@ -260,7 +265,8 @@ send(To, From, Encoded) ->
                         ).
 
 -spec handle_send(kz_term:binaries(), kz_term:ne_binary(), gen_smtp_send_resp()) ->
-          {'ok', kz_term:ne_binary()} | {'error', any()}.
+          {'ok', kz_term:ne_binary()} |
+          {'error', any()}.
 handle_send(To, From, {'ok', Pid}) ->
     handle_send(To, From, Pid);
 handle_send(_To, _From, {'error', _R}=Error) ->
@@ -270,7 +276,9 @@ handle_send(To, From, _Pid) when is_pid(_Pid) ->
     lager:debug("smtp client is processing with pid ~p", [_Pid]),
     wait_for_response(To, From).
 
--spec wait_for_response(kz_term:binaries(), kz_term:ne_binary()) -> {'ok', kz_term:ne_binary()} | {'error', any()}.
+-spec wait_for_response(kz_term:binaries(), kz_term:ne_binary()) ->
+          {'ok', kz_term:ne_binary()} |
+          {'error', any()}.
 wait_for_response(To, From) ->
     Timeout = kapps_config:get_pos_integer(<<"smtp_client">>, <<"send_timeout_ms">>, 10 * ?MILLISECONDS_IN_SECOND),
 
@@ -285,7 +293,8 @@ wait_for_response(To, From) ->
     end.
 
 -spec handle_relay_response(kz_term:binaries(), kz_term:ne_binary(), {'ok', kz_term:ne_binary()} | {'error', any()}) ->
-          {'ok', kz_term:ne_binary()} | {'error', any()}.
+          {'ok', kz_term:ne_binary()} |
+          {'error', any()}.
 handle_relay_response(To, From, {'ok', Receipt}) ->
     kz_cache:store_local(?CACHE_NAME
                         ,{'receipt', Receipt}
@@ -1115,17 +1124,14 @@ read_pem_file(AccountId, PvtKeyFileId) ->
 
 -spec set_dkim_options(kz_term:api_ne_binary(), kz_term:api_ne_binary(), kz_term:api_ne_binary()) ->
           kz_term:proplist().
-set_dkim_options(PvtKey, DKIMSelector, Domain)
-  when PvtKey =:= 'undefined'
-       orelse DKIMSelector =:= 'undefined'
-       orelse Domain =:= 'undefined' ->
-    [];
-set_dkim_options(PvtKey, DKIMSelector, Domain) ->
+set_dkim_options(<<PvtKey/binary>>, <<DKIMSelector/binary>>, <<Domain/binary>>) ->
     DKIMOptions = [{'s', DKIMSelector}
                   ,{'d', Domain}
                   ,{'private_key', {'pem_plain', PvtKey}}
                   ],
-    [{'dkim', DKIMOptions}].
+    [{'dkim', DKIMOptions}];
+set_dkim_options(_PvtKey, _DKIMSelector, _Domain) ->
+    [].
 
 -spec get_template_account_id(kz_json:object(), kz_term:ne_binary()) -> kz_term:ne_binary().
 get_template_account_id(TemplateMetaJObj, AccountId) ->

@@ -16,7 +16,7 @@ src/teletype_default_modules.hrl:
 clean: clean-default_modules
 
 clean-default_modules:
-	rm -f src/teletype_default_modules.hrl
+	@rm -f src/teletype_default_modules.hrl
 
 compile-test-direct: default_modules
 
