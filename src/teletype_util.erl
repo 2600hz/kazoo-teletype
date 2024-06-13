@@ -83,17 +83,17 @@ send_email(Emails0, Subject, RenderedTemplates, AccountId, Attachments) ->
     From = props:get_ne_binary_value(<<"from">>, Emails),
     Email = {<<"multipart">>
             ,<<"mixed">>
-            ,email_parameters([{<<"To">>, To}
-                              ,{<<"Cc">>, props:get_value(<<"cc">>, Emails)}
-                              ,{<<"Bcc">>, props:get_value(<<"bcc">>, Emails)}
-                              ,{<<"X-Teletype-Log-ID">>, get_call_id()}
-                              ]
-                             ,[{<<"From">>, From}
-                              ,{<<"Reply-To">>, props:get_value(<<"reply_to">>, Emails)}
-                              ,{<<"Subject">>, Subject}
-                              ]
-                             )
-            ,[{<<"content-type-params">>, [{<<"charset">>, <<"utf-8">>}]}]
+            ,email_headers([{<<"To">>, To}
+                           ,{<<"Cc">>, props:get_value(<<"cc">>, Emails)}
+                           ,{<<"Bcc">>, props:get_value(<<"bcc">>, Emails)}
+                           ,{<<"X-Teletype-Log-ID">>, get_call_id()}
+                           ]
+                          ,[{<<"From">>, From}
+                           ,{<<"Reply-To">>, props:get_value(<<"reply_to">>, Emails)}
+                           ,{<<"Subject">>, Subject}
+                           ]
+                          )
+            ,#{content_type_params => [{<<"charset">>, <<"utf-8">>}]}
             ,[email_body(RenderedTemplates)
              | add_attachments(Attachments)
              ]
@@ -185,39 +185,30 @@ email_body(RenderedTemplates) ->
     {<<"multipart">>
     ,<<"alternative">>
     ,[] %% Headers
-    ,[] %% ContentTypeParams
+    ,#{} %% ContentTypeParams
     ,add_rendered_templates_to_email(RenderedTemplates)
     }.
 
--spec email_parameters(kz_term:proplist(), kz_term:proplist()) -> kz_term:proplist().
-email_parameters([], Params) ->
+-spec email_headers(kz_term:proplist(), kz_term:proplist()) -> kz_term:proplist().
+email_headers([], Params) ->
     lists:reverse(props:filter_empty(Params));
-email_parameters([{_Key, 'undefined'}|T], Params) ->
-    email_parameters(T, Params);
-email_parameters([{Key, V}|T], Params) ->
-    email_parameters(T, [{Key, V} | Params]).
+email_headers([{_Key, 'undefined'}|T], Params) ->
+    email_headers(T, Params);
+email_headers([{Key, V}|T], Params) ->
+    email_headers(T, [{Key, V} | Params]).
 
 -spec relay_email(kz_term:api_binaries(), kz_term:ne_binary(), mimemail:mimetuple(), kz_term:proplist()) ->
           {'ok', kz_term:ne_binary()} |
           {'error', any()}.
-relay_email(To
-           ,From
-           ,{_Type
-            ,_SubType
-            ,Addresses
-            ,ContentTypeParams
-            ,_Body
-            }=Email
-           ,Options
-           ) when is_list(ContentTypeParams) ->
+relay_email(To, From, {_Type, _SubType, Headers, _ParamsMap, _Body}=Email, Options) ->
     try mimemail:encode(Email, Options) of
         Encoded ->
             RelayResult = relay_encoded_email(To, From, Encoded),
-            maybe_relay_to_bcc(From, Encoded, props:get_value(<<"Bcc">>, Addresses)),
+            maybe_relay_to_bcc(From, Encoded, props:get_value(<<"Bcc">>, Headers)),
             RelayResult
     catch
         'error':'missing_from' ->
-            lager:warning("no From address: ~s: ~p", [From, Addresses]),
+            lager:warning("no From address: ~s: ~p", [From, Headers]),
             {'error', 'missing_from'};
         _E:_R:ST ->
             lager:warning("failed to encode email: ~s: ~p", [_E, _R]),
@@ -342,6 +333,7 @@ smtp_options() ->
       ,{'tls', smtp_tls_option(TLS)}
       ,{'ssl', SSL}
       ,{'trace_fun', fun(Format, Args) -> lager:info(Format, Args) end}
+      ,{'sockopts', [{verify, verify_none}]}
       ]).
 
 -spec smtp_auth_option(kz_term:ne_binary()) -> atom().
@@ -369,7 +361,7 @@ add_attachments([{ContentType, Filename, Content}|As], Acc) ->
                   ,{<<"Content-Type">>, <<ContentType/binary, "; name=\"", Filename/binary, "\"">>}
                   ,{<<"Content-Transfer-Encoding">>, <<"base64">>}
                   ]
-                 ,[]
+                 ,#{} %% content_params
                  ,Content
                  },
     lager:debug("adding attachment ~s (~s)", [Filename, ContentType]),
@@ -396,7 +388,7 @@ add_rendered_templates_to_email([{ContentType, Content}|Rs], Acc) ->
                   [{<<"Content-Type">>, iolist_to_binary([ContentType, <<";charset=utf-8">>])}
                   ,{<<"Content-Transfer-Encoding">>, CTEncoding}
                   ])
-               ,[]
+               ,#{} %% content params
                ,sanitize_content(iolist_to_binary(Content))
                },
     lager:debug("adding template ~s (encoding ~s)", [ContentType, CTEncoding]),
