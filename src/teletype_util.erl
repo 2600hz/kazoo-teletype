@@ -332,7 +332,7 @@ smtp_options() ->
       ,{'no_mx_lookups', NoMxLookups}
       ,{'tls', smtp_tls_option(TLS)}
       ,{'ssl', SSL}
-      ,{'trace_fun', fun lager:info/2}
+      ,{'trace_fun', fun(Fmt, Args) -> lager:info(Fmt, Args) end}
       ,{'sockopts', [{verify, verify_none}]}
       ]).
 
