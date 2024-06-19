@@ -8,7 +8,7 @@
 
     Emergency Service Address:
         {% if call.emergency_address_street_1 %}
-        {{call.emergency_address_street_1}}
+        {% if call.emergency_address_house_number %}{% call.emergency_address_house_number %} {% endif %}{{call.emergency_address_street_1}}
         {{call.emergency_address_street_2}}
         {{call.emergency_address_city}}, {{call.emergency_address_region}} {{call.emergency_address_postal_code}}
         {% endif %}
@@ -40,7 +40,3 @@ Account Information
 
 
 Sent from {{system.encoded_node}}
-
-
-
-
