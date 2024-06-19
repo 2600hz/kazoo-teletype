@@ -49,8 +49,8 @@
                             <dt style="font-family:'Open Sans',sans-serif;color:#555555;line-height:20px;padding:0 0 10px;"><b>Call-ID:</b> <span style="font-family:monospace;">{{call.call_id}}</span></dt>
                             {% if call.emergency_address_street_1 %}
                             <dt style="font-family:'Open Sans',sans-serif;color:#555555;line-height:20px;padding:0 0 10px;"><b>Emergency Service Address:</b></dt>
-                             <dd style="padding:0;margin:0 0 0 40px;">
-                                {{call.emergency_address_street_1}}<br/>
+                            <dd style="padding:0;margin:0 0 0 40px;">
+                                {% if call.emergency_address_house_number %}{% call.emergency_address_house_number %} {% endif %}{{call.emergency_address_street_1}} <br />
                                 {{call.emergency_address_street_2}}<br/>
                                 {{call.emergency_address_city}}, {{call.emergency_address_region}} {{call.emergency_address_postal_code}}
                             </dd>
