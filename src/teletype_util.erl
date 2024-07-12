@@ -320,6 +320,8 @@ smtp_options() ->
     TLS = kapps_config:get_ne_binary(<<"smtp_client">>, <<"tls">>),
     SSL = kapps_config:get_is_true(<<"smtp_client">>, <<"use_ssl">>, 'false'),
 
+    SSLSockOpts = ssl_sock_opts(SSL),
+
     lager:debug("relaying via ~s", [Relay]),
 
     props:filter_empty(
@@ -331,10 +333,15 @@ smtp_options() ->
       ,{'retries', Retries}
       ,{'no_mx_lookups', NoMxLookups}
       ,{'tls', smtp_tls_option(TLS)}
-      ,{'ssl', SSL}
       ,{'trace_fun', fun(Format, Args) -> lager:info(Format, Args) end}
-      ,{'sockopts', [{verify, verify_none}]}
+      | SSLSockOpts
       ]).
+
+ssl_sock_opts('false') -> [];
+ssl_sock_opts('true') ->
+    [{'sockopts', [{'verify', 'verify_none'}]}
+    ,{'ssl', 'true'}
+    ].
 
 -spec smtp_auth_option(kz_term:ne_binary()) -> atom().
 smtp_auth_option(<<"if_available">>) -> 'if_available';
