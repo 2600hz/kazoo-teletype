@@ -1084,10 +1084,8 @@ attachment_from_url_result(Headers, Body) ->
                end,
     {CT, Filename, Body}.
 
--spec maybe_set_dkim_options(kz_term:api_ne_binary(), kz_term:ne_binary() | kz_term:ne_binaries()) -> kz_term:proplist().
+-spec maybe_set_dkim_options(kz_term:api_ne_binary(), kz_term:ne_binary()) -> kz_term:proplist().
 maybe_set_dkim_options('undefined', _From) -> [];
-maybe_set_dkim_options(AccountId, [From|_]) ->
-    maybe_set_dkim_options(AccountId, From);
 maybe_set_dkim_options(AccountId, From) ->
     case kzd_whitelabel:fetch(AccountId) of
         {'ok', WhiteLabelJObj} ->
