@@ -1,9 +1,28 @@
-                Email Verification
+                DKIM Verification Required
 
+ 
 
-Hello,
+Dear {{user.first_name}},
 
-We received a request to verify your email address.
-If you did not make this request, just ignore this email. Otherwise, please use below code to verify your email address:
+You or an administrator has requested the verification of this email address to enable the sending of email templates. 
+Please use the following PIN code to complete the verification process:
 
 {{verification_code}}
+
+
+DKIM (DomainKeys Identified Mail) is an email authentication method that enables senders to digitally sign their messages, 
+ensuring the authenticity of the sender and preventing tampering during transit. This cryptographic signature is verified 
+by the recipient's email server, enhancing email security by reducing the risks of spoofing and phishing.
+ 
+
+If you did not request this verification, please ignore this email.
+
+Thank you for your prompt attention to this matter.
+
+Account Information
+
+    Account ID: {{account.id}}
+    Account Name: {{account.name}}
+    Account Realm: {{account.realm}}
+
+Sent from {{system.encoded_node}}
