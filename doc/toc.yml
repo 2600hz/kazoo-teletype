@@ -1,0 +1,4 @@
+  - 'Teletype: Receive events and send them to interested parties':
+    - 'doc/README.md'
+    - 'doc/customer_defined_notification.md'
+    # - 'teletype/doc/maintenance.md'
