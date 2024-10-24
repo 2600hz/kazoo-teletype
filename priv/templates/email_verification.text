@@ -1,8 +1,7 @@
                 DKIM Verification Required
 
  
-
-Dear {{user.first_name}},
+Hello,
 
 You or an administrator has requested the verification of this email address to enable the sending of email templates. 
 Please use the following PIN code to complete the verification process:
