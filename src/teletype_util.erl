@@ -336,7 +336,8 @@ smtp_options() ->
       | SSLSockOpts
       ]).
 
-ssl_sock_opts('false') -> [];
+ssl_sock_opts('false') ->
+    [{'tls_options', [{'verify', 'verify_none'}]}];
 ssl_sock_opts('true') ->
     [{'sockopts', [{'verify', 'verify_none'}]}
     ,{'ssl', 'true'}
