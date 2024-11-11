@@ -73,7 +73,7 @@ sup teletype_maintenance force_system_default {ACCOUNT_ID} {TEMPLATE_NAME}
 
 ## Configuring Basic SMTP Client
 
-For sending email templates you need to have a SMTP server. Use this these settings to configure the Kazoo how to connect to SMTP server:
+For sending email templates you need to have a SMTP server. Use this these settings to configure the {% BRAND_NAME %} how to connect to SMTP server:
 
 * `configure_smtp_relay`: URL/IP of SMTP server, default `localhost`
 * `configure_smtp_port`: SMTP server port to connect, default `25`
