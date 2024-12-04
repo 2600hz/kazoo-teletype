@@ -101,7 +101,7 @@ process_req(DataJObj) ->
     VMBoxJObj = get_vmbox(DataJObj),
     UserJObj = get_owner(VMBoxJObj, DataJObj),
     BoxEmails = kzd_vmboxes:notify_email_addresses(VMBoxJObj),
-    Emails = maybe_add_user_email(BoxEmails, kzd_users:email(UserJObj), kzd_users:vm_to_email_enabled(UserJObj)),
+    Emails = maybe_add_user_email(BoxEmails, kzd_users:email(UserJObj), is_owner_vm_notification_enabled(VMBoxJObj, UserJObj)),
     Values = [{<<"vmbox_doc">>, VMBoxJObj}
              ,{<<"user">>, UserJObj}
              ,{<<"to">>, Emails}
@@ -332,3 +332,27 @@ maybe_add_file_data(Macros, [{ContentType, FileName, Bin}]) ->
               ]),
     VMF = props:set_values(Props, props:get_value(<<"voicemail">>, Macros, [])),
     props:set_value(<<"voicemail">>, VMF, Macros).
+
+%%------------------------------------------------------------------------------
+%% @doc Check whether the owner of the vm box needs to be notified by email
+%% @end
+%%------------------------------------------------------------------------------
+-spec is_owner_vm_notification_enabled(kz_json:object(), kz_json:object()) -> boolean().
+is_owner_vm_notification_enabled(VMBox, OwnerJObj) ->
+    case is_shared_vm_box(VMBox) of
+        'true' ->
+            kz_term:is_true(kz_json:get_value(<<"shared_vmbox_notify_owner_email">>, VMBox, 'true'))
+                andalso kzd_users:vm_to_email_enabled(OwnerJObj);
+        'false' ->
+            kzd_users:vm_to_email_enabled(OwnerJObj)
+    end.
+
+%%------------------------------------------------------------------------------
+%% @doc Check whether the VM Box is the Shared VM Box or the Personal based on
+%%      "members" field in the VM Box doc and "shared_vmbox" field
+%% @end
+%%------------------------------------------------------------------------------
+-spec is_shared_vm_box(kz_json:object()) -> boolean().
+is_shared_vm_box(VBoxDoc) ->
+    kz_json:is_true(<<"shared_vmbox">>, VBoxDoc, 'false')
+        andalso lists:member(<<"members">>, kz_json:get_keys(VBoxDoc)).
