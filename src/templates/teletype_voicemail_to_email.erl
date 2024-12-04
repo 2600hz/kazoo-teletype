@@ -1,5 +1,5 @@
 %%%-----------------------------------------------------------------------------
-%%% @copyright (C) 2014-2024, 2600Hz
+%%% @copyright (C) 2014-2025, 2600Hz
 %%% @doc
 %%% @author James Aimonetti
 %%%
@@ -101,7 +101,7 @@ process_req(DataJObj) ->
     VMBoxJObj = get_vmbox(DataJObj),
     UserJObj = get_owner(VMBoxJObj, DataJObj),
     BoxEmails = kzd_vmboxes:notify_email_addresses(VMBoxJObj),
-    Emails = maybe_add_user_email(BoxEmails, kzd_users:email(UserJObj), kzd_users:vm_to_email_enabled(UserJObj)),
+    Emails = maybe_add_user_email(BoxEmails, kzd_users:email(UserJObj), is_owner_vm_notification_enabled(VMBoxJObj, UserJObj)),
     Values = [{<<"vmbox_doc">>, VMBoxJObj}
              ,{<<"user">>, UserJObj}
              ,{<<"to">>, Emails}
@@ -332,3 +332,17 @@ maybe_add_file_data(Macros, [{ContentType, FileName, Bin}]) ->
               ]),
     VMF = props:set_values(Props, props:get_value(<<"voicemail">>, Macros, [])),
     props:set_value(<<"voicemail">>, VMF, Macros).
+
+%%------------------------------------------------------------------------------
+%% @doc Check whether the owner of the vm box needs to be notified by email
+%% @end
+%%------------------------------------------------------------------------------
+-spec is_owner_vm_notification_enabled(kzd_vmboxes:doc(), kz_json:object()) -> boolean().
+is_owner_vm_notification_enabled(VMBox, OwnerJObj) ->
+    case kzd_vmboxes:is_shared_vmbox(VMBox) of
+        'true' ->
+            kzd_vmboxes:shared_vmbox_notify_owner_email(VMBox)
+                andalso kzd_users:vm_to_email_enabled(OwnerJObj);
+        'false' ->
+            kzd_users:vm_to_email_enabled(OwnerJObj)
+    end.
