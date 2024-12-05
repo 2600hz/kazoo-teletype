@@ -337,22 +337,12 @@ maybe_add_file_data(Macros, [{ContentType, FileName, Bin}]) ->
 %% @doc Check whether the owner of the vm box needs to be notified by email
 %% @end
 %%------------------------------------------------------------------------------
--spec is_owner_vm_notification_enabled(kz_json:object(), kz_json:object()) -> boolean().
+-spec is_owner_vm_notification_enabled(kzd_vmboxes:doc(), kz_json:object()) -> boolean().
 is_owner_vm_notification_enabled(VMBox, OwnerJObj) ->
-    case is_shared_vm_box(VMBox) of
+    case kzd_vmboxes:shared_vmbox(VMBox) of
         'true' ->
-            kz_term:is_true(kz_json:get_value(<<"shared_vmbox_notify_owner_email">>, VMBox, 'true'))
+            kzd_vmboxes:shared_vmbox_notify_owner_email(VMBox)
                 andalso kzd_users:vm_to_email_enabled(OwnerJObj);
         'false' ->
             kzd_users:vm_to_email_enabled(OwnerJObj)
     end.
-
-%%------------------------------------------------------------------------------
-%% @doc Check whether the VM Box is the Shared VM Box or the Personal based on
-%%      "members" field in the VM Box doc and "shared_vmbox" field
-%% @end
-%%------------------------------------------------------------------------------
--spec is_shared_vm_box(kz_json:object()) -> boolean().
-is_shared_vm_box(VBoxDoc) ->
-    kz_json:is_true(<<"shared_vmbox">>, VBoxDoc, 'false')
-        andalso lists:member(<<"members">>, kz_json:get_keys(VBoxDoc)).
