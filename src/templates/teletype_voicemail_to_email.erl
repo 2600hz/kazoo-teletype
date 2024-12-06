@@ -339,7 +339,7 @@ maybe_add_file_data(Macros, [{ContentType, FileName, Bin}]) ->
 %%------------------------------------------------------------------------------
 -spec is_owner_vm_notification_enabled(kzd_vmboxes:doc(), kz_json:object()) -> boolean().
 is_owner_vm_notification_enabled(VMBox, OwnerJObj) ->
-    case kzd_vmboxes:shared_vmbox(VMBox) of
+    case kzd_vmboxes:is_shared_vmbox(VMBox) of
         'true' ->
             kzd_vmboxes:shared_vmbox_notify_owner_email(VMBox)
                 andalso kzd_users:vm_to_email_enabled(OwnerJObj);
