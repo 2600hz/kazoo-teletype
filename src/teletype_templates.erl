@@ -1,5 +1,5 @@
 %%%-----------------------------------------------------------------------------
-%%% @copyright (C) 2014-2023, 2600Hz
+%%% @copyright (C) 2014-2025, 2600Hz
 %%% @doc
 %%% @author Peter Defebvre
 %%%
@@ -64,13 +64,19 @@ params(Module)
     ,{'text', TemplateId}
     ].
 
--spec init(kz_term:ne_binary(), init_params()) -> 'ok'.
-init(TemplateId, Params) ->
-    UpdatedParams = props:insert_values([{'html', TemplateId}
-                                        ,{'text', TemplateId}
+-spec init(kz_term:ne_binary() | {atom(), kz_term:ne_binary()}, init_params()) -> 'ok'.
+init(Template, Params) ->
+    UpdatedParams = props:insert_values([{'html', Template}
+                                        ,{'text', Template}
                                         ]
                                        ,Params
                                        ),
+    TemplateId =
+        case Template of
+            {_AppDir, Name} -> Name;
+            Template -> Template
+        end,
+
     DocId = doc_id(TemplateId),
     lager:debug("init template ~s", [DocId]),
     case kz_datamgr:open_cache_doc(?KZ_CONFIG_DB, DocId) of
