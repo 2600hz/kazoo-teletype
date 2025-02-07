@@ -24,7 +24,8 @@
                       {'from', kz_term:ne_binary()} |
                       {'reply_to', kz_term:api_binary()} |
                       {'html', kz_term:ne_binary() | {atom(), kz_term:ne_binary()}} |
-                      {'text', kz_term:ne_binary() | {atom(), kz_term:ne_binary()}}.
+                      {'text', kz_term:ne_binary() | {atom(), kz_term:ne_binary()}} |
+                      {'account_id', kz_term:api_ne_binary()}.
 -type init_params() :: [init_param(),...].
 
 -type template_response() :: 'ok' |

@@ -1,5 +1,5 @@
 %%%-----------------------------------------------------------------------------
-%%% @copyright (C) 2014-2023, 2600Hz
+%%% @copyright (C) 2014-2025, 2600Hz
 %%% @doc
 %%% @author Peter Defebvre
 %%%
@@ -31,10 +31,6 @@
 -type macro() :: {kz_term:ne_binary(), kz_term:ne_binary() | number() | macros()}.
 -type macros() :: [macro()].
 
--define(TEMPLATE_FAILURE_KEY(TemplateId, AccountId)
-       ,{?MODULE, TemplateId, AccountId}
-       ).
-
 %%------------------------------------------------------------------------------
 %% @doc
 %% @end
@@ -60,9 +56,17 @@ params(Module)
     ,{'cc', Module:cc()}
     ,{'bcc', Module:bcc()}
     ,{'reply_to', Module:reply_to()}
-    ,{'html', TemplateId}
-    ,{'text', TemplateId}
+    | maybe_add_optional_params(TemplateId, Module)
     ].
+
+-spec maybe_add_optional_params(kz_term:ne_binary(), module()) -> kz_term:proplist().
+maybe_add_optional_params(TemplateId, Module) ->
+    Optional = ['account_id'
+               ,'html'
+               ,'text'
+               ],
+    Required = [{'html', TemplateId}, {'text', TemplateId}],
+    props:insert_values(Required, [{Key, Module:Key()} || Key <- Optional, kz_module:is_exported(Module, Key, 0)]).
 
 -spec init(kz_term:ne_binary(), init_params()) -> 'ok'.
 init(TemplateId, Params) ->
@@ -72,8 +76,9 @@ init(TemplateId, Params) ->
                                        ,Params
                                        ),
     DocId = doc_id(TemplateId),
-    lager:debug("init template ~s", [DocId]),
-    case kz_datamgr:open_cache_doc(?KZ_CONFIG_DB, DocId) of
+    Db = db_name(props:get_value('account_id', Params)),
+    lager:debug("init template ~s/~s", [Db, DocId]),
+    case kz_datamgr:open_cache_doc(Db, DocId) of
         {'ok', TemplateJObj} ->
             maybe_update(TemplateJObj, UpdatedParams);
         {'error', 'not_found'} ->
@@ -81,15 +86,15 @@ init(TemplateId, Params) ->
         {'error', _E} ->
             lager:warning("failed to find template ~s", [DocId])
     end,
-    compile_master_renderers(TemplateId).
+    compile_master_renderers(Db, TemplateId).
 
--spec compile_master_renderers(kz_term:ne_binary()) -> 'ok'.
-compile_master_renderers(TemplateId) ->
+-spec compile_master_renderers(kz_term:ne_binary(), kz_term:ne_binary()) -> 'ok'.
+compile_master_renderers(Db, TemplateId) ->
     _ = [build_renderer(TemplateId, ContentType, Template)
-         || {ContentType, Template} <- fetch_master_attachments(TemplateId)
+         || {ContentType, Template} <- fetch_attachments(TemplateId, Db)
         ],
     %% ?LOG_DEBUG("built master renderer modules for ~s", [TemplateId]).
-    lager:debug("built master renderer modules for ~s", [TemplateId]).
+    lager:debug("built master renderer modules for ~s/~s", [Db, TemplateId]).
 
 -spec build_renderer(kz_term:ne_binary(), kz_term:ne_binary(), binary()) -> 'ok'.
 build_renderer(TemplateId, ContentType, Template) ->
@@ -103,10 +108,6 @@ build_renderer(TemplateId, ContentType, Template) ->
 
 -type template_attachment() :: {kz_term:ne_binary(), binary()}.
 -type template_attachments() :: [template_attachment()].
-
--spec fetch_master_attachments(kz_term:ne_binary()) -> template_attachments().
-fetch_master_attachments(TemplateId) ->
-    fetch_attachments(TemplateId, ?KZ_CONFIG_DB).
 
 -spec fetch_attachments(kz_term:ne_binary(), kz_term:ne_binary()) -> template_attachments().
 fetch_attachments(TemplateId, Account) ->
@@ -345,11 +346,12 @@ maybe_decode_html(HTML) ->
 -spec create(kz_term:ne_binary(), init_params()) -> 'ok'.
 create(DocId, Params) ->
     lager:debug("attempting to create template ~s", [DocId]),
+    AccountId = props:get_value('account_id', Params, ?KZ_CONFIG_DB),
     TemplateJObj =
         kz_doc:update_pvt_parameters(kz_json:from_list([{<<"_id">>, DocId}])
-                                    ,?KZ_CONFIG_DB
-                                    ,[{'account_db', ?KZ_CONFIG_DB}
-                                     ,{'account_id', ?KZ_CONFIG_DB}
+                                    ,db_name(AccountId)
+                                    ,[{'account_db', db_name(AccountId)}
+                                     ,{'account_id', AccountId}
                                      ,{'type', kz_notification:pvt_type()}
                                      ]
                                     ),
@@ -406,15 +408,16 @@ update(TemplateJObj, Params) ->
           {'ok', kz_json:object()} |
           {'error', any()}.
 save(TemplateJObj) ->
-    SaveJObj = kz_doc:update_pvt_parameters(TemplateJObj, ?KZ_CONFIG_DB, [{'type', kz_notification:pvt_type()}]),
-    case kz_datamgr:save_doc(?KZ_CONFIG_DB, SaveJObj) of
+    Db = db_name(TemplateJObj),
+    SaveJObj = kz_doc:update_pvt_parameters(TemplateJObj, Db, [{'type', kz_notification:pvt_type()}]),
+    case kz_datamgr:save_doc(Db, SaveJObj) of
         {'ok', _JObj}=OK ->
             lager:debug("saved updated template ~s(~s) to ~s"
-                       ,[kz_doc:id(_JObj), kz_doc:revision(_JObj), ?KZ_CONFIG_DB]
+                       ,[kz_doc:id(_JObj), kz_doc:revision(_JObj), Db]
                        ),
             OK;
         {'error', _E}=E ->
-            lager:debug("failed to save template to ~s: ~p", [?KZ_CONFIG_DB, _E]),
+            lager:debug("failed to save template to ~s: ~p", [Db, _E]),
             E
     end.
 
@@ -426,11 +429,23 @@ save(TemplateJObj) ->
 
 -spec update_from_params(kz_json:object(), init_params()) ->
           update_acc().
-update_from_params(TemplateJObj, Params) ->
-    lists:foldl(fun update_from_param/2
-               ,{'false', TemplateJObj}
-               ,[{'pvt_type', kz_notification:pvt_type()} | Params]
-               ).
+update_from_params(TemplateJObj, Params0) ->
+    %% set account id first, so we update attachments in correct db
+    case props:take_value('account_id', Params0) of
+        {'undefined', Params} ->
+            lists:foldl(fun update_from_param/2
+                       ,{'false', TemplateJObj}
+                       ,[{'pvt_type', kz_notification:pvt_type()} | Params]
+                       );
+        {AccountId, Params} ->
+            Setters = [{fun kz_doc:set_account_db/2, db_name(AccountId)}
+                      ,{fun kz_doc:set_account_id/2, AccountId}
+                      ],
+            lists:foldl(fun update_from_param/2
+                       ,{'false', kz_doc:setters(TemplateJObj, Setters)}
+                       ,[{'pvt_type', kz_notification:pvt_type()} | Params]
+                       )
+    end.
 
 %%------------------------------------------------------------------------------
 %% @doc
@@ -556,17 +571,17 @@ update_subject(Subject, Acc) ->
                 ,fun kz_notification:set_subject/2
                 ).
 
--spec update_html_attachment(binary(), update_acc()) -> update_acc().
+-spec update_html_attachment(kz_term:ne_binary() | {atom(), kz_term:ne_binary()}, update_acc()) -> update_acc().
 update_html_attachment(Basename, Acc) ->
     case read_template_from_disk(Basename, 'html') of
         {'ok', HTML} ->
             update_attachment(HTML, Acc, ?TEXT_HTML);
         {'error', _E} ->
-            lager:info("failed to find template '~s.html': ~p", [Basename, _E]),
+            lager:info("failed to find template '~p.html': ~p", [Basename, _E]),
             Acc
     end.
 
--spec update_text_attachment(binary(), update_acc()) -> update_acc().
+-spec update_text_attachment(kz_term:ne_binary() | {atom(), kz_term:ne_binary()}, update_acc()) -> update_acc().
 update_text_attachment(Basename, Acc) ->
     case read_template_from_disk(Basename, 'text') of
         {'ok', Text} ->
@@ -585,21 +600,20 @@ update_text_attachment(Basename, Acc) ->
           update_acc().
 update_attachment(Contents, {_IsUpdated, TemplateJObj}=Acc, ContentType) ->
     AttachmentName = attachment_name(ContentType),
-    Id = kz_doc:id(TemplateJObj),
-    case does_attachment_exist(Id, AttachmentName) of
+    case does_attachment_exist(TemplateJObj, AttachmentName) of
         'true' -> Acc;
         'false' ->
-            update_attachment(Contents, Acc, ContentType, Id, AttachmentName)
+            update_attachment(Contents, Acc, ContentType, AttachmentName)
     end.
 
--spec update_attachment(binary(), update_acc(), kz_term:ne_binary(), kz_term:ne_binary(), kz_term:ne_binary()) ->
+-spec update_attachment(binary(), update_acc(), kz_term:ne_binary(), kz_term:ne_binary()) ->
           update_acc().
-update_attachment(Contents, {IsUpdated, TemplateJObj}=Acc, ContentType, Id, AName) ->
-    lager:debug("attachment ~s doesn't exist for ~s", [AName, Id]),
-    case save_attachment(Id, AName, ContentType, Contents) of
+update_attachment(Contents, {IsUpdated, TemplateJObj}=Acc, ContentType, AName) ->
+    lager:debug("attachment ~s doesn't exist for ~s", [AName, kz_doc:id(TemplateJObj)]),
+    case save_attachment(TemplateJObj, AName, ContentType, Contents) of
         {'ok', AttachmentJObj} ->
             ?LOG_DEBUG("saved attachment: ~p", [AttachmentJObj]),
-            {'ok', UpdatedJObj} = kz_datamgr:open_doc(?KZ_CONFIG_DB, Id),
+            {'ok', UpdatedJObj} = kz_datamgr:open_doc(db_name(TemplateJObj), kz_doc:id(TemplateJObj)),
             Merged = kz_json:merge_jobjs(UpdatedJObj, TemplateJObj),
             {IsUpdated, Merged};
         {'error', _E} ->
@@ -638,43 +652,47 @@ attachment_name(ContentType) ->
 %% @doc
 %% @end
 %%------------------------------------------------------------------------------
--spec does_attachment_exist(kz_term:ne_binary(), kz_term:ne_binary()) -> boolean().
-does_attachment_exist(DocId, AName) ->
-    case kz_datamgr:open_doc(?KZ_CONFIG_DB, DocId) of
+-spec does_attachment_exist(kz_json:object(), kz_term:ne_binary()) -> boolean().
+does_attachment_exist(TemplateJObj, AName) ->
+    Db = db_name(TemplateJObj),
+    Id = kz_doc:id(TemplateJObj),
+    case kz_datamgr:open_doc(Db, Id) of
         {'ok', JObj} ->
             kz_doc:attachment(JObj, cow_qs:urldecode(AName)) =/= 'undefined';
         {'error', _E} ->
-            lager:debug("failed to open ~s to check for ~s: ~p", [DocId, AName, _E]),
+            lager:debug("failed to open ~s/~s to check for ~s: ~p", [Db, Id, AName, _E]),
             'false'
     end.
 %%------------------------------------------------------------------------------
 %% @doc
 %% @end
 %%------------------------------------------------------------------------------
--spec save_attachment(kz_term:ne_binary(), kz_term:ne_binary(), kz_term:ne_binary(), binary()) ->
+-spec save_attachment(kz_json:object(), kz_term:ne_binary(), kz_term:ne_binary(), binary()) ->
           {'ok', kz_json:object()} |
           {'error', any()}.
-save_attachment(DocId, AName, ContentType, Contents) ->
+save_attachment(TemplateJObj, AName, ContentType, Contents) ->
     Options = [{'content_type', kz_term:to_list(ContentType)}],
-    case kz_datamgr:put_attachment(?KZ_CONFIG_DB, DocId, AName, Contents, Options) of
+    Db = db_name(TemplateJObj),
+    DocId = kz_doc:id(TemplateJObj),
+    case kz_datamgr:put_attachment(Db, DocId, AName, Contents, Options) of
         {'ok', _UpdatedJObj}=OK ->
-            lager:debug("added attachment ~s to ~s", [AName, DocId]),
+            lager:debug("added attachment ~s to ~s/~s", [AName, Db, DocId]),
             OK;
         {'error', 'conflict'}=E ->
             case does_attachment_exist(DocId, AName) of
                 'true' ->
-                    lager:debug("added attachment ~s to ~s", [AName, DocId]),
-                    kz_datamgr:open_doc(?KZ_CONFIG_DB, DocId);
+                    lager:debug("added attachment ~s to ~s/~s", [AName, Db, DocId]),
+                    kz_datamgr:open_doc(Db, DocId);
                 'false' ->
-                    lager:debug("failed to add attachment ~s to ~s", [AName, DocId]),
+                    lager:debug("failed to add attachment ~s to ~s/~s", [AName, Db, DocId]),
                     E
             end;
         {'error', _E}=E ->
-            lager:debug("failed to add attachment ~s to ~s: ~p", [AName, DocId, _E]),
+            lager:debug("failed to add attachment ~s to ~s/~s: ~p", [AName, Db, DocId, _E]),
             E
     end.
 
--spec write_templates_to_disk(kz_term:ne_binary(), kz_term:proplist()) -> 'ok'.
+-spec write_templates_to_disk(kz_term:ne_binary() | {atom(), kz_term:ne_binary()}, kz_term:proplist()) -> 'ok'.
 write_templates_to_disk(TemplateId, Params) ->
     lists:foreach(fun(Template) ->
                           write_template_to_disk(TemplateId, Template)
@@ -686,14 +704,14 @@ write_templates_to_disk(TemplateId, Params) ->
                    )
                  ).
 
--spec read_template_from_disk(kz_term:ne_binary(), 'html' | 'text') ->
+-spec read_template_from_disk(kz_term:ne_binary() | {atom(), kz_term:ne_binary()}, 'html' | 'text') ->
           {'ok', binary()} |
           {'error', file:posix() | 'badarg' | 'terminated' | 'system_limit'}.
 read_template_from_disk(TemplateId, Type) ->
     file:read_file(
       template_filename(TemplateId, Type)).
 
--spec write_template_to_disk(kz_term:ne_binary(), {'html' | 'text', binary()}) -> 'ok'.
+-spec write_template_to_disk(kz_term:ne_binary() | {atom(), kz_term:ne_binary()}, {'html' | 'text', binary()}) -> 'ok'.
 write_template_to_disk(TemplateId, {Type, Template}) ->
     File = template_filename(TemplateId, Type),
     'ok' = file:write_file(File, Template).
@@ -710,3 +728,11 @@ template_filename({App, TemplateId}, Type) ->
 template_filename(App, TemplateId, Type) ->
     Basename = iolist_to_binary([TemplateId, ".", kz_term:to_list(Type)]),
     filename:join([code:priv_dir(App), "templates", Basename]).
+
+-spec db_name(kz_term:api_ne_binary() | kz_json:object()) -> kz_term:ne_binary().
+db_name('undefined') ->
+    ?KZ_CONFIG_DB;
+db_name(<<AccountId/binary>>) ->
+    kzs_util:to_database(AccountId);
+db_name(JObj) ->
+    kz_doc:account_db(JObj, ?KZ_CONFIG_DB).
