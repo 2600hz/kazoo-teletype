@@ -443,7 +443,9 @@ system_params() ->
 user_params(UserJObj) ->
     Ks = [{<<"first_name">>, fun kzd_users:first_name/1}
          ,{<<"last_name">>, fun kzd_users:last_name/1}
+         ,{<<"full_name">>, fun kzd_users:full_name/1}
          ,{<<"email">>, fun kzd_users:email/1}
+         ,{<<"username">>, fun kzd_users:username/1}
          ,{<<"timezone">>, fun kzd_users:timezone/1}
          ],
     props:filter_undefined(
