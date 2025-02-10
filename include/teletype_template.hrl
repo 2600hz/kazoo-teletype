@@ -24,7 +24,8 @@
                       {'from', kz_term:ne_binary()} |
                       {'reply_to', kz_term:api_binary()} |
                       {'html', kz_term:ne_binary() | {atom(), kz_term:ne_binary()}} |
-                      {'text', kz_term:ne_binary() | {atom(), kz_term:ne_binary()}}.
+                      {'text', kz_term:ne_binary() | {atom(), kz_term:ne_binary()}} |
+                      {'account_id', kz_term:api_ne_binary()}.
 -type init_params() :: [init_param(),...].
 
 -type template_response() :: 'ok' |
@@ -109,6 +110,7 @@
 -define(USER_MACROS
        ,[?MACRO_VALUE(<<"user.first_name">>, <<"user_first_name">>, <<"First Name">>, <<"First name of the user">>)
         ,?MACRO_VALUE(<<"user.last_name">>, <<"user_last_name">>, <<"Last Name">>, <<"Last name of the user">>)
+        ,?MACRO_VALUE(<<"user.full_name">>, <<"user_full_name">>, <<"Full Name">>, <<"Full name of the user">>)
         ,?MACRO_VALUE(<<"user.email">>, <<"user_email">>, <<"Email">>, <<"Email of the user">>)
         ,?MACRO_VALUE(<<"user.timezone">>, <<"user_timezone">>, <<"Timezone">>, <<"Timezone of the user">>)
         ,?MACRO_VALUE(<<"user.username">>, <<"username">>, <<"Username">>, <<"Username">>)
