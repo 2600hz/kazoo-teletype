@@ -13,8 +13,6 @@
 
 -include_lib("teletype.hrl").
 
-
--callback id() -> kz_term:ne_binary().
 -optional_callbacks([account_id/0
                     ,html/0
                     ,text/0
