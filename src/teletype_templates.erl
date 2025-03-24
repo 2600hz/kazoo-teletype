@@ -679,7 +679,7 @@ save_attachment(TemplateJObj, AName, ContentType, Contents) ->
             lager:debug("added attachment ~s to ~s/~s", [AName, Db, DocId]),
             OK;
         {'error', 'conflict'}=E ->
-            case does_attachment_exist(DocId, AName) of
+            case does_attachment_exist(TemplateJObj, AName) of
                 'true' ->
                     lager:debug("added attachment ~s to ~s/~s", [AName, Db, DocId]),
                     kz_datamgr:open_doc(Db, DocId);
