@@ -82,8 +82,9 @@ handle_req(JObj, 'true') ->
     DataJObj = kz_json:normalize(JObj),
     AccountId = kz_json:get_value(<<"account_id">>, DataJObj),
 
-    case teletype_util:is_notice_override(JObj) andalso 
-        teletype_util:is_notice_enabled(AccountId, JObj, id()) of
+    case teletype_util:should_notify(JObj) 
+        andalso teletype_util:is_notice_enabled(AccountId, JObj, id()) 
+    of
         'false' -> teletype_util:notification_disabled(DataJObj, id());
         'true' -> process_req(DataJObj)
     end.
