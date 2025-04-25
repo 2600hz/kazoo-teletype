@@ -59,8 +59,9 @@ notification(JObj) ->
     lager:debug("dispatching notification ~s", [RoutingKey]),
     case kazoo_bindings:map(RoutingKey, JObj) of
         [] ->
-            FailureMsg = <<"no teletype template modules responded to notification, not sending update for ", RoutingKey/binary>>,
-            lager:debug("~s", [FailureMsg]);
+            FailureMsg = <<"no teletype template modules responded to notification, ignoring ", RoutingKey/binary>>,
+            lager:debug("~s", [FailureMsg]),
+            teletype_util:send_update(JObj, <<"ignored">>, FailureMsg);
         BindingResult ->
             {_, Map} = handle_notification_results(BindingResult, {RoutingKey, maps:new()}),
             maybe_send_update(JObj, RoutingKey, Map)
