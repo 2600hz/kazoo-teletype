@@ -1,5 +1,5 @@
 %%%-----------------------------------------------------------------------------
-%%% @copyright (C) 2010-2023, 2600Hz
+%%% @copyright (C) 2010-2025, 2600Hz
 %%% @doc
 %%% This Source Code Form is subject to the terms of the Mozilla Public
 %%% License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -59,9 +59,9 @@ notification(JObj) ->
     lager:debug("dispatching notification ~s", [RoutingKey]),
     case kazoo_bindings:map(RoutingKey, JObj) of
         [] ->
-            FailureMsg = <<"no teletype template modules responded to notification ", RoutingKey/binary>>,
+            FailureMsg = <<"no teletype template modules responded to notification, ignoring ", RoutingKey/binary>>,
             lager:debug("~s", [FailureMsg]),
-            teletype_util:send_update(JObj, <<"failed">>, FailureMsg);
+            teletype_util:send_update(JObj, <<"ignored">>, FailureMsg);
         BindingResult ->
             {_, Map} = handle_notification_results(BindingResult, {RoutingKey, maps:new()}),
             maybe_send_update(JObj, RoutingKey, Map)
