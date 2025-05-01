@@ -25,6 +25,7 @@
         ,find_account_db/2
         ,find_account_params/1
         ,is_notice_enabled/3, is_notice_enabled_default/1
+        ,should_notify/1
 
         ,branding_params/1
         ,find_branding_params/1
@@ -729,6 +730,10 @@ is_notice_enabled_default(TemplateKey) ->
             lager:debug("system is mute, ~s not enabled", [TemplateId]),
             'false'
     end.
+
+- spec should_notify(kz_json:object()) -> boolean().
+should_notify(ApiJObj) ->
+    kz_json:is_true(<<"Should-Notify">>, ApiJObj, 'true').
 
 -spec find_addresses(kz_json:object(), kz_json:object(), kz_term:ne_binary()) ->
           email_map().
