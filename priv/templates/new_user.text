@@ -3,9 +3,11 @@
 
 Welcome {{user.first_name}},
 
+{% if user.password %}
 Your user profile is ready to use, here are login details to sign in.
 
     Please make sure to change your password as soon as you sign in!
+{% endif %}
 
 
 === Profile Information ===
@@ -13,9 +15,14 @@ Your user profile is ready to use, here are login details to sign in.
     First Name: {{user.first_name}}
     Last Name: {{user.last_name}}
     User Name: {{user.email}}
+{% if user.password %}
     Password: {{user.password}}
+{% endif %}
 
-
+{% if user.password_reset_link %}
+    Setup the password of your VoIP services of account {{account.name}}.
+    Please use {{user.password_reset_link}} to set your password to get started using your VoIP services.
+{% endif %}
 
 Account Information
 

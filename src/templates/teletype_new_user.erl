@@ -31,6 +31,7 @@ id() -> <<"new_user">>.
 macros() ->
     kz_json:from_list(
       [?MACRO_VALUE(<<"user.password">>, <<"password">>, <<"Password">>, <<"Password">>)
+      ,?MACRO_VALUE(<<"user.password_reset_link">>, <<"password_reset_link">>, <<"Password Reset Link">>, <<"Password Reset Link">>)
       | ?USER_MACROS
        ++ ?COMMON_TEMPLATE_MACROS
       ]).
@@ -119,22 +120,31 @@ macros(DataJObj, 'false') ->
 -spec create_macros(kz_json:object()) -> kz_term:proplist().
 create_macros(DataJObj) ->
     UserDoc = kz_json:get_value(<<"user">>, DataJObj, kz_json:new()),
-    UserParams = case kz_json:get_value(<<"password">>, UserDoc) of
-                     'undefined' -> teletype_util:user_params(UserDoc);
-                     Password -> [{<<"password">>, Password}|teletype_util:user_params(UserDoc)]
-                 end,
+    UserParams = get_params(UserDoc
+                           ,kz_json:get_value(<<"password_reset_link">>, DataJObj, 'undefined')
+                           ),
     [{<<"system">>, teletype_util:system_params()}
     ,{<<"account">>, teletype_util:account_params(DataJObj)}
     ,{<<"user">>, UserParams}
     ].
 
+-spec get_params(kz_json:object(), kz_term:api_binary()) -> kz_term:proplist().
+get_params(UserDoc, 'undefined') ->
+    case kz_json:get_value(<<"password">>, UserDoc) of
+        'undefined' -> teletype_util:user_params(UserDoc);
+        Password -> [{<<"password">>, Password} | teletype_util:user_params(UserDoc)]
+    end;
+get_params(UserDoc, Url) ->
+    [{<<"password_reset_link">>, Url} | teletype_util:user_params(UserDoc)].
+
 -spec get_user_doc(kz_json:object()) -> kz_json:object().
 get_user_doc(DataJObj) ->
     UserId = kz_json:get_value(<<"user_id">>, DataJObj),
     {'ok', UserJObj} = teletype_util:open_doc(<<"user">>, UserId, DataJObj),
-    Password = kz_json:get_value(<<"password">>, DataJObj),
-
-    Values = [{<<"user">>, kz_json:set_value(<<"password">>, Password, UserJObj)}
+    UserProps = [{<<"password">>, kz_json:get_value(<<"password">>, DataJObj)}
+                ,{<<"password_reset_link">>, kz_json:get_value(<<"password_reset_link">>, DataJObj)}
+                ],
+    Values = [{<<"user">>, kz_json:set_values(UserProps, UserJObj)}
              ,{<<"to">>, [kz_json:get_ne_value(<<"email">>, UserJObj)]}
              ],
     ReqData = kz_json:set_values(Values, DataJObj),
