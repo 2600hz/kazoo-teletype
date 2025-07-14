@@ -756,6 +756,9 @@ find_address(DataJObj, TemplateMetaJObj, ConfigCat, Key) ->
 
 -spec find_address(kz_json:object(), kz_json:object(), kz_term:ne_binary(), kz_term:ne_binary(), kz_term:api_binary(), boolean()) ->
           email_pair().
+find_address(DataJObj, TemplateMetaJObj, <<"emergency_bridge">> = _ConfigCat, <<"to">> = Key, _Type, _) ->
+    lager:debug("find ~s email address for ~s", [Key, _ConfigCat]),
+    {Key, find_emergency_emails(DataJObj, TemplateMetaJObj)};
 find_address(DataJObj, TemplateMetaJObj, _ConfigCat, Key, 'undefined', _) ->
     lager:debug("email type for '~s' not defined in template, checking just the key", [Key]),
     {Key, find_first_defined_address(Key, [[Key]], [DataJObj, TemplateMetaJObj])};
@@ -1091,6 +1094,35 @@ attachment_from_url_result(Headers, Body) ->
                    FileDisposition -> FileDisposition
                end,
     {CT, Filename, Body}.
+
+find_emergency_emails(DataJObj, _TemplateMetaJObj) ->
+    Number = kz_json:get_binary_value(<<"emergency_caller_id_number">>, DataJObj, <<"">>),
+    AccountId = kapi_notifications:account_id(DataJObj),
+    NumDoc = get_number_doc(kzs_util:format_account_db(AccountId), knm_converters:normalize(Number, AccountId)),
+    case kzd_phone_numbers:e911_notification_contact_emails(NumDoc, []) of
+        [] -> find_account_emergency_emails(DataJObj);
+        Emails -> Emails
+    end.
+
+find_account_emergency_emails(DataJObj) ->
+    AccountId = kapi_notifications:account_id(DataJObj),
+    {'ok', AccountDoc} = kzd_accounts:fetch(AccountId),
+    Contacts = kzd_accounts:notifications_emergency_emails(AccountDoc, []),
+    Emails = lists:foldl(fun(Contact, Acc) ->
+                                 case kz_json:get_binary_value(<<"email">>, Contact) of
+                                     'undefined' -> Acc;
+                                     Email -> Acc ++ [Email]
+                                 end end, [], Contacts),
+    Emails.
+
+get_number_doc(_AccountDB, 'undefined') ->
+    kz_json:new();
+get_number_doc(AccountDB, DocId) ->
+    case kz_datamgr:open_cache_doc(AccountDB, DocId) of
+        {'ok', Doc} ->
+            Doc;
+        {'error', _} -> kz_json:new()
+    end.
 
 -spec maybe_set_dkim_options(kz_term:api_ne_binary(), kz_term:ne_binary()) -> kz_term:proplist().
 maybe_set_dkim_options('undefined', _From) -> [];

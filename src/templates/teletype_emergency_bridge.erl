@@ -84,7 +84,6 @@ handle_req(JObj, 'true') ->
     %% Gather data for template
     DataJObj = kz_json:normalize(JObj),
     AccountId = kz_json:get_value(<<"account_id">>, DataJObj),
-
     case teletype_util:is_notice_enabled(AccountId, JObj, ?TEMPLATE_ID) of
         'false' -> teletype_util:notification_disabled(DataJObj, ?TEMPLATE_ID);
         'true' -> process_req(DataJObj)
@@ -98,7 +97,6 @@ process_req(DataJObj) ->
              ],
     %% Load templates
     Templates = teletype_templates:render(?TEMPLATE_ID, Macros, DataJObj),
-
 
     %% Populate templates
     RenderedTemplates = [{ContentType, teletype_util:render(?TEMPLATE_ID, Template, Macros)}
@@ -114,6 +112,7 @@ process_req(DataJObj) ->
 
     Emails = maybe_update_to(DataJObj, TemplateMetaJObj),
     TemplateAccountId = teletype_util:get_template_account_id(TemplateMetaJObj, AccountId),
+    lager:debug("e911 send email notification to ~p", [Emails]),
 
     case teletype_util:send_email(Emails, Subject, RenderedTemplates, TemplateAccountId) of
         'ok' -> teletype_util:notification_completed(?TEMPLATE_ID);
