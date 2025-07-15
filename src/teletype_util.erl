@@ -1115,8 +1115,6 @@ find_account_emergency_emails(DataJObj) ->
                                  end end, [], Contacts),
     Emails.
 
-get_number_doc(_AccountDB, 'undefined') ->
-    kz_json:new();
 get_number_doc(AccountDB, DocId) ->
     case kz_datamgr:open_cache_doc(AccountDB, DocId) of
         {'ok', Doc} ->
