@@ -1107,7 +1107,7 @@ find_emergency_emails(DataJObj, _TemplateMetaJObj) ->
 find_account_emergency_emails(DataJObj) ->
     AccountId = kapi_notifications:account_id(DataJObj),
     {'ok', AccountDoc} = kzd_accounts:fetch(AccountId),
-    Contacts = kzd_accounts:notifications_emergency_emails(AccountDoc, []),
+    Contacts = kz_json:get_list_value([<<"notifications">>, <<"emergency">>, <<"emails">>], AccountDoc, []),
     Emails = lists:foldl(fun(Contact, Acc) ->
                                  case kz_json:get_binary_value(<<"email">>, Contact) of
                                      'undefined' -> Acc;
