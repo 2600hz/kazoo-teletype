@@ -1098,7 +1098,7 @@ attachment_from_url_result(Headers, Body) ->
 find_emergency_emails(DataJObj, _TemplateMetaJObj) ->
     Number = kz_json:get_binary_value(<<"emergency_caller_id_number">>, DataJObj, <<"">>),
     AccountId = kapi_notifications:account_id(DataJObj),
-    NumDoc = get_number_doc(kzs_util:format_account_db(AccountId), knm_converters:normalize(Number, AccountId)),
+    NumDoc = get_number_doc(AccountId, knm_converters:normalize(Number, AccountId)),
     case kzd_phone_numbers:e911_notification_contact_emails(NumDoc, []) of
         [] -> find_account_emergency_emails(DataJObj);
         Emails -> Emails
@@ -1108,11 +1108,12 @@ find_account_emergency_emails(DataJObj) ->
     AccountId = kapi_notifications:account_id(DataJObj),
     {'ok', AccountDoc} = kzd_accounts:fetch(AccountId),
     Contacts = kz_json:get_list_value([<<"notifications">>, <<"emergency">>, <<"emails">>], AccountDoc, []),
-    Emails = lists:foldl(fun(Contact, Acc) ->
-                                 case kz_json:get_binary_value(<<"email">>, Contact) of
-                                     'undefined' -> Acc;
-                                     Email -> Acc ++ [Email]
-                                 end end, [], Contacts),
+    ExtractEmail = fun(Contact, Acc) ->
+        case kz_json:get_binary_value(<<"email">>, Contact) of
+            'undefined' -> Acc;
+            Email -> Acc ++ [Email]
+        end end,
+    Emails = lists:foldl(ExtractEmail, [], Contacts),
     Emails.
 
 get_number_doc(AccountDB, DocId) ->
